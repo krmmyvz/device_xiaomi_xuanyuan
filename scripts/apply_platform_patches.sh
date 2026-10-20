@@ -36,7 +36,7 @@ done
 
 # ------------------------------------------------ 0) once base SHA'lari dogrula
 log "Base SHA dogrulamasi (pinned manifest ile)"
-if ! "$PY" "${PROJECT_ROOT}/scripts/verify_patch_bases.py" --tree "$TREE"; then
+if ! "$PY" "$TREE/scripts/verify_patch_bases.py" --tree "$TREE"; then
   err "Base SHA tutmuyor - patch'ler uygulanamaz."
   err "Cikis: --force ile zorla dene (guvenli DEGILDIR, yamanin kaybolma riski var)"
   [[ $FORCE -eq 1 ]] || exit 1

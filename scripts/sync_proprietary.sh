@@ -29,6 +29,16 @@ done
 [[ -d "$PRIV" ]] || die "Private repo yok: $PRIV"
 [[ -d "$DEV" ]]  || die "Device tree yok: $DEV"
 
+# LFS pointer kontrolu: private repo git-lfs kullanir. 'git lfs pull'
+# calistirilmamissa APK'lar 131 baytlik stub olarak kalir ve build
+# sessizce bozuk APK paketler. Bu durumda dur.
+stub=$(find "$PRIV" -name "*.apk" -size -1k 2>/dev/null | head -1)
+if [[ -n "$stub" ]]; then
+  err "LFS icerigi eksik - '$stub' bir LFS pointer (stub), gercek dosya degil"
+  dim  "  cd $PRIV && git lfs install --local && git lfs pull"
+  exit 1
+fi
+
 PAYLOADS=(
   prebuilts/miuicamera
   prebuilts/camera

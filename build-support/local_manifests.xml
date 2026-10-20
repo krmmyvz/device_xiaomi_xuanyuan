@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  local_manifests.xml - xuanyuan (Xiaomi 15 Ultra) cihaz agacini platform
+  manifestine baglayan yerel manifest.
+
+  Bu dosya .repo/local_manifests/ icine kopyalanir ve asagidaki projeleri
+  pinli EvoX manifestinin (build-support/evox-manifest-pinned.xml) uzerine ekler.
+
+  Kapsam:
+    - device/xiaomi/xuanyuan        : cihaz agaci (bu repo, public)
+    - device/xiaomi/sm8750-common   : SM8750 ortak urun katmani
+    - kernel/xiaomi/generic         : prebuilt GKI kernel + dtb/dtbo/vendor_boot
+    - vendor/xiaomi/xuanyuan        : Xiaomi proprietary blob agaci (5392 blob)
+    - device/xiaomi/xuanyuan-kernel : kernel device tree (dtb/dtb-cio)
+
+  Not: 'github-non-los' remote'u GitHub'a isaret eder; repo public oldugu icin
+  kimlik bilgisi gerektirmez.
+-->
+<manifest>
+  <remote name="github-non-los" fetch="https://github.com/"/>
+
+  <!-- Cihaz agaci: bu repodan build sirasinda guncellenmemis olmali. -->
+  <project name="krmmyvz/device_xiaomi_xuanyuan"
+           path="device/xiaomi/xuanyuan"
+           remote="github-non-los"
+           revision="refs/heads/main"/>
+
+  <!--
+    SM8750 ortak katman: device.mk -> device/xiaomi/sm8750-common/common.mk
+
+    Bu repo icerigi repo kokunde tutar (sm8750-common/ alt klasoru YOK), bu yuzden
+    path dogrudan 'device/xiaomi/sm8750-common' olur.
+
+    Not: path 'device/xiaomi' olsaydi hem ic ice cakisma olurdu (asagida
+    device/xiaomi/xuanyuan ve device/xiaomi/xuanyuan-kernel var), hem de
+    device.mk'nin bekledigi yol yanlis olurdu.
+  -->
+  <project name="krmmyvz/device_xiaomi_sm8750_common"
+           path="device/xiaomi/sm8750-common"
+           remote="github-non-los"
+           revision="refs/heads/main"/>
+
+  <!-- Prebuilt kernel: BoardConfig.mk -> TARGET_KERNEL_SOURCE=kernel/xiaomi/generic -->
+  <project name="krmmyvz/kernel_xiaomi_generic"
+           path="kernel/xiaomi/generic"
+           remote="github-non-los"
+           revision="refs/heads/main"/>
+
+  <!-- Xiaomi proprietary vendor blob'lari -->
+  <project name="xiaomi-8750/proprietary_vendor_xiaomi_xuanyuan"
+           path="vendor/xiaomi/xuanyuan"
+           remote="github-non-los"
+           revision="refs/heads/beryl"/>
+
+  <!-- Kernel device tree: dtb / dtb-cio uretimi -->
+  <project name="xiaomi-8750/android_device_xiaomi_xuanyuan-kernel"
+           path="device/xiaomi/xuanyuan-kernel"
+           remote="github-non-los"
+           revision="refs/heads/beryl"/>
+</manifest>

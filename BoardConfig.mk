@@ -75,6 +75,11 @@ BOARD_KERNEL_SEPARATED_DTBO := true
 TARGET_KERNEL_CONFIG := generic_defconfig
 TARGET_KERNEL_SOURCE := kernel/xiaomi/generic
 
+# KERNEL_DIR: prebuilt kernel dosyalarinin bulundugu dizin.
+# TARGET_KERNEL_SOURCE ayni dizini verir; yollar agac kokune gore relative'dir.
+# (Tanimlanmazsa $(KERNEL_DIR)/kernel -> '/kernel' olur ve prebuilt adimlari patlar.)
+KERNEL_DIR := $(TARGET_KERNEL_SOURCE)
+
 # Kernel - prebuilt
 TARGET_FORCE_PREBUILT_KERNEL := true
 ifeq ($(TARGET_FORCE_PREBUILT_KERNEL),true)
