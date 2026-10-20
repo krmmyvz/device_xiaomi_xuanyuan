@@ -7,7 +7,7 @@ index aa06e078550..092861b9b05 100644
      defaults: ["tflite_defaults"],
      whole_static_libs: ["libtflite_static"],
 +    target: {
-+        android: {
++        android_arm64: {
 +            srcs: [
 +                "delegates/xnnpack/quantization_util.cc",
 +                "delegates/xnnpack/xnnpack_delegate.cc",
