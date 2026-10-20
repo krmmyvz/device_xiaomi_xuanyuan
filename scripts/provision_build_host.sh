@@ -182,9 +182,19 @@ Derleme adimlari (root olmayan kullanici olarak):
   #   - hardware/xiaomi namespace'i PRODUCT_SOONG_NAMESPACES'e eklenir
   #   - vendor/xiaomi'deki var olmayan namespace import'u kaldirilir
   #   - vendor/xiaomi'deki ayni isimli iki farkli tipteki modul ayrilir
+  #   - external/tensorflow'daki partition cakismali modul kaldirilir
+  #   - cihaz agacindaki yinelenen telephony stub kaldirilir
+  #   - FlipFlap'in AOSPA fork'unda olmayan modul referansi kaldirilir
   bash <device-tree>/scripts/fix_xiaomi_namespace.sh
   bash <device-tree>/scripts/fix_vendor_namespace.sh
   bash <device-tree>/scripts/fix_vendor_module_conflicts.sh
+  bash <device-tree>/scripts/fix_tensorflow_partition.sh
+  bash <device-tree>/scripts/fix_duplicate_telephony_stub.sh
+  bash <device-tree>/scripts/fix_flipflap_resources.sh
+
+  # Checkout bozulmussa (NAS baglantisi kesintisi) onar:
+  #   bash <device-tree>/scripts/find_broken_projects.sh
+  #   bash <device-tree>/scripts/reclone_projects.sh <bozuk-projeler>
 
   source build/envsetup.sh
   lunch lineage_xuanyuan-bp4a-userdebug
