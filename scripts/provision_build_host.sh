@@ -108,14 +108,22 @@ ok "swap: $(free -g | awk '/^Swap:/{print $2}') GB"
 # ------------------------------------------------------------------ ccache
 # AOSP ccache'i sadece USE_CCACHE=1 + CCACHE_DIR ile kullanir.
 # Temiz derlemede ccache kazanc saglamaz, yalnizca REBUILD'lerde ise yarar.
-CCACHE_DIR="${CCACHE_DIR:-/mnt/shared/ccache}"
+#
+# CCACHE_DIR varsayilani /mnt/out/ccache: build'in out/ diziniyle ayni diskte
+# (genelde hizli NVMe). /mnt/shared gibi ayri bir yol kullanmak ccache'i
+# baska bir diske yazar ve iki ayri CCACHE_DIR tanimi birbirini ezer.
+CCACHE_DIR="${CCACHE_DIR:-/mnt/out/ccache}"
 mkdir -p "$CCACHE_DIR"
 ccache -M "${CCACHE_GB}G" >/dev/null 2>&1 || true
+# ccache'in rehber (hash) dizini her zaman kullaniciya ait olmali; root'a
+# ait bir dizinde calisan ccache 'Permission denied' verir.
+CCACHE_DIR="$CCACHE_DIR" ccache -M "${CCACHE_GB}G" >/dev/null 2>&1 || true
+chown -R "$(id -u):$(id -g)" "$CCACHE_DIR" 2>/dev/null || true
 cat > /etc/profile.d/aosp-ccache.sh <<EOF
 export USE_CCACHE=1
 export CCACHE_DIR=$CCACHE_DIR
 export CCACHE_EXEC=$CCACHE_DIR/ccache
-export CCACHE_BASEDIR=/root
+export CCACHE_BASEDIR=${CCACHE_BASEDIR:-$HOME}
 EOF
 chmod 644 /etc/profile.d/aosp-ccache.sh
 grep -q "aosp-ccache.sh" /root/.bashrc 2>/dev/null || echo '. /etc/profile.d/aosp-ccache.sh' >> /root/.bashrc
@@ -129,8 +137,11 @@ cat > /etc/sysctl.d/99-aosp-build.conf <<'EOF'
 vm.swappiness=10
 vm.vfs_cache_pressure=50
 EOF
-if ! sysctl --system 2>&1 | grep -q "vm.vfs.cache_pressure"; then
-  ok "sysctl uygulandi (vm.vfs_cache_pressure)"
+# Dogrulama: ayarlanan degerin gercekten uygulandigini okuyarak kontrol et.
+# (sysctl --system ciktisini grep'lemek yanlis: gercek anahtar alt cizgili.)
+if sysctl -n vm.swappiness 2>/dev/null | grep -qx 10 \
+   && sysctl -n vm.vfs_cache_pressure 2>/dev/null | grep -qx 50; then
+  ok "sysctl uygulandi (vm.swappiness=10, vm.vfs_cache_pressure=50)"
 else
   err "sysctl hatasi - asagidaki dosyayi kontrol et"
   cat /etc/sysctl.d/99-aosp-build.conf
