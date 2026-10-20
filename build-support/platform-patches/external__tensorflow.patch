@@ -2,10 +2,11 @@ diff --git a/tensorflow/lite/Android.bp b/tensorflow/lite/Android.bp
 index aa06e078550..092861b9b05 100644
 --- a/tensorflow/lite/Android.bp
 +++ b/tensorflow/lite/Android.bp
-@@ -146,6 +146,24 @@ cc_library_shared {
+@@ -146,6 +146,25 @@ cc_library_shared {
      name: "libtensorflowlite_c",
      defaults: ["tflite_defaults"],
      whole_static_libs: ["libtflite_static"],
++    vendor_available: true,
 +    target: {
 +        android_arm64: {
 +            srcs: [
