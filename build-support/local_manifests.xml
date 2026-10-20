@@ -11,7 +11,6 @@
     - device/xiaomi/sm8750-common   : SM8750 ortak urun katmani
     - kernel/xiaomi/generic         : prebuilt GKI kernel + dtb/dtbo/vendor_boot
     - vendor/xiaomi/xuanyuan        : Xiaomi proprietary vendor blob agaci
-    - device/xiaomi/xuanyuan-kernel : kernel device tree (dtb/dtb-cio)
 
   REMOTE'LAR:
   Pinned manifestteki <remote> tanimlari buraya tasindi ve pinned manifestten
@@ -72,9 +71,37 @@
            remote="github-non-los"
            revision="refs/heads/beryl"/>
 
-  <!-- Kernel device tree: dtb / dtb-cio uretimi -->
-  <project name="xiaomi-8750/android_device_xiaomi_xuanyuan-kernel"
-           path="device/xiaomi/xuanyuan-kernel"
+  <!--
+    device/xiaomi/xuanyuan-kernel KALDIRILDI.
+
+    Bu proje Android.bp icinde qti_kernel_headers, qti_display_kernel_headers
+    ve qti_ipa_kernel_headers modullerini tanimliyor. Ayni moduller
+    hardware/qcom-caf/common/Android.bp icinde de tanimli oldugu icin Soong
+    analizi su hatayi veriyor ve hicbir sey derlenmiyor:
+
+      error: hardware/qcom-caf/common/Android.bp:16:1:
+             module "qti_display_kernel_headers" already defined
+             device/xiaomi/xuanyuan-kernel/Android.bp:13:1 (previous definition)
+
+    Ayrica bu projeye cihaz agacinda HICBIR referans yok: BoardConfig.mk
+    kernel'i "kernel/xiaomi/generic" (prebuilt GKI) uzerinden aliyor.
+    Yani proje hem cakisma yaratiyor hem de kullanilmiyor.
+  -->
+
+  <!--
+    hardware/xiaomi namespace'i: cihaz agacinin Android.bp dosyasi
+    "soong_namespace { name: "hardware/xiaomi" }" ilan ediyor, ancak bu
+    namespace'i tanimlayan proje manifestte yoktu. Soong analizi su hatayi
+    veriyor ve derleme baslamiyor:
+
+      error: device/xiaomi/xuanyuan/Android.bp:6:1: module "soong_namespace":
+             namespace hardware/xiaomi does not exist
+
+    Kaynak: xiaomi-8750/android_hardware_xiaomi (branch beryl). HIDL
+    HAL'lar (hidl/, interfaces/, sensors/, telephony/, fingerprint/).
+  -->
+  <project name="xiaomi-8750/android_hardware_xiaomi"
+           path="hardware/xiaomi"
            remote="github-non-los"
            revision="refs/heads/beryl"/>
 </manifest>
