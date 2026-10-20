@@ -176,6 +176,16 @@ Derleme adimlari (root olmayan kullanici olarak):
   # platform patch'leri - base SHA tutmuyorsa HATA VERIR, sessizce atmaz
   bash <device-tree>/scripts/apply_platform_patches.sh
 
+  # Soong namespace / modul cakismasi duzeltmeleri.
+  # Bunlar build'i durduran GERCEK hatalardir; ayrica hicbiri repo
+  # icerigine dokunmaz, sadece checkout uzerinde calisir:
+  #   - hardware/xiaomi namespace'i PRODUCT_SOONG_NAMESPACES'e eklenir
+  #   - vendor/xiaomi'deki var olmayan namespace import'u kaldirilir
+  #   - vendor/xiaomi'deki ayni isimli iki farkli tipteki modul ayrilir
+  bash <device-tree>/scripts/fix_xiaomi_namespace.sh
+  bash <device-tree>/scripts/fix_vendor_namespace.sh
+  bash <device-tree>/scripts/fix_vendor_module_conflicts.sh
+
   source build/envsetup.sh
   lunch lineage_xuanyuan-bp4a-userdebug
   m evolution -j\$(nproc)
