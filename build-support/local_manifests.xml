@@ -13,12 +13,11 @@
     - vendor/xiaomi/xuanyuan        : Xiaomi proprietary blob agaci (5392 blob)
     - device/xiaomi/xuanyuan-kernel : kernel device tree (dtb/dtb-cio)
 
-  Not: 'github-non-los' remote'u GitHub'a isaret eder; repo public oldugu icin
-  kimlik bilgisi gerektirmez.
+  Not: 'github-non-los' remote'u pinned manifestte ZATEN tanimli; burada tekrar
+  tanimlanmaz. Ayni isim farkli fetch ile tekrar tanimlanirsa repo sync
+  "remote github-non-los already exists with different attributes" ile durur.
 -->
 <manifest>
-  <remote name="github-non-los" fetch="https://github.com/"/>
-
   <!-- Cihaz agaci: bu repodan build sirasinda guncellenmemis olmali. -->
   <project name="krmmyvz/device_xiaomi_xuanyuan"
            path="device/xiaomi/xuanyuan"
