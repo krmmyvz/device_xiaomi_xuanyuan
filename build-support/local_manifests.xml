@@ -10,14 +10,30 @@
     - device/xiaomi/xuanyuan        : cihaz agaci (bu repo, public)
     - device/xiaomi/sm8750-common   : SM8750 ortak urun katmani
     - kernel/xiaomi/generic         : prebuilt GKI kernel + dtb/dtbo/vendor_boot
-    - vendor/xiaomi/xuanyuan        : Xiaomi proprietary blob agaci (5392 blob)
+    - vendor/xiaomi/xuanyuan        : Xiaomi proprietary vendor blob agaci
     - device/xiaomi/xuanyuan-kernel : kernel device tree (dtb/dtb-cio)
 
-  Not: 'github-non-los' remote'u pinned manifestte ZATEN tanimli; burada tekrar
-  tanimlanmaz. Ayni isim farkli fetch ile tekrar tanimlanirsa repo sync
-  "remote github-non-los already exists with different attributes" ile durur.
+  REMOTE'LAR:
+  Pinned manifestteki <remote> tanimlari buraya tasindi ve pinned manifestten
+  cikarildi. Ayni remote adi iki manifest icinde farkli fetch/review ile
+  tanimlanirsa repo sync
+  "remote <isim> already exists with different attributes" ile durur.
+
+  Not: 'github' remote'u fetch=".." ile göreli yol kullanir (LineageOS
+  convention); local manifestte de aynen korunur.
 -->
 <manifest>
+  <remote name="aosp" fetch="https://android.googlesource.com" review="android-review.googlesource.com" revision="refs/tags/android-16.0.0_r4"/>
+  <remote name="evo" fetch="https://github.com/Evolution-X" revision="refs/heads/bka"/>
+  <remote name="evo-devices" fetch="https://github.com/Evolution-X-Devices" revision="refs/heads/bka"/>
+  <remote name="evo-tensor" fetch="https://git.evolution-x.org/Evolution-X-Tensor" revision="refs/heads/bka"/>
+  <remote name="github" fetch=".." review="review.lineageos.org"/>
+  <remote name="github-non-los" fetch="https://github.com"/>
+  <remote name="gitlab" fetch="https://gitlab.com"/>
+  <remote name="private" fetch="ssh://git@github.com"/>
+
+  <default remote="github" revision="refs/heads/lineage-23.2" sync-j="4" sync-c="true"/>
+
   <!-- Cihaz agaci: bu repodan build sirasinda guncellenmemis olmali. -->
   <project name="krmmyvz/device_xiaomi_xuanyuan"
            path="device/xiaomi/xuanyuan"
