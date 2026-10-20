@@ -27,6 +27,11 @@
   <remote name="evo" fetch="https://github.com/Evolution-X" revision="refs/heads/bka"/>
   <remote name="evo-devices" fetch="https://github.com/Evolution-X-Devices" revision="refs/heads/bka"/>
   <remote name="evo-tensor" fetch="https://git.evolution-x.org/Evolution-X-Tensor" revision="refs/heads/bka"/>
+  <!-- fetch=".." bir placeholder DEGILDIR: repo init -u <url> ile verilen
+       URL'den son segment ("manifest") dusulur ve base "https://github.com/"
+       olur. Boylece "LineageOS/android_xyz" proje adlari dogru adrese
+       (https://github.com/LineageOS/android_xyz) cozulur. Burada elle bir
+       adres yazmak remote'un cozumlemesini bozar. -->
   <remote name="github" fetch=".." review="review.lineageos.org"/>
   <remote name="github-non-los" fetch="https://github.com"/>
   <remote name="gitlab" fetch="https://gitlab.com"/>

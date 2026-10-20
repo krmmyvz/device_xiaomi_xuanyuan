@@ -19,15 +19,44 @@
 # Device tree'nin bulundugu dizin (env.sh'in kendi yolu)
 DEVICE_TREE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Ust dizin: device tree bu ust dizinin icinde bekleniyor (rom/device_xiaomi_xuanyuan)
-: "${PROJECT_ROOT:=$(dirname "$DEVICE_TREE_DIR")}"
-: "${ROM:=${PROJECT_ROOT}/rom}"
-: "${AOSP_ROOT:=${HOME}/android/evolution}"
+# Ust dizin: device tree bu ust dizinin icinde bekleniyor (rom/device/xiaomi_xuanyuan)
+#
+# DOGRULAMA: bu dosya bir alt kabukta source edildiginde (script'ler
+# "source .../env.sh" yapar) ortam degiskenleri KORUNMALIDIR.
+# ':=' ile atama, degisken export EDILMEMISSE her source'da yeniden
+# hesaplanir. Boylece "ROM=/mnt/src" disaridan verilse bile
+# PROJECT_ROOT/rom'a (orn. /home/builder/rom/rom) ezilir ve scriptler
+# yanlis dizini arar. Asagida her iki deger de export edilerek sabitlenir.
+export PROJECT_ROOT="${PROJECT_ROOT:-$(dirname "$DEVICE_TREE_DIR")}"
+
+# AOSP kok dizini: otomatik tespit.
+#
+# env.sh iki farkli yerde yasar:
+#   1) Build agacinda: <AOSP>/device/xiaomi/xuanyuan/env.sh  -> kok 3 seviye
+#      yukarida (xuanyuan -> xiaomi -> device -> AOSP).
+#   2) Ayri klon: ~/rom/device_xiaomi_xuanyuan/env.sh -> kok buradan
+#      TESPIT EDILEMEZ, ortam degiskeni (ROM/AOSP_ROOT) gerekir.
+#
+# Otomatik tespit, script'lerin "bash scripts/..." ile (login shell
+# olmadan) calistirilmasini da guvenli kilar: AOSP_ROOT profile.d'den
+# gelmezse burada dogru yol bulunur.
+_aosp_auto=""
+case "$DEVICE_TREE_DIR" in
+  */device/xiaomi/xuanyuan) _aosp_auto="$(cd "$DEVICE_TREE_DIR/../../.." && pwd)" ;;
+esac
+
+export AOSP_ROOT="${AOSP_ROOT:-${_aosp_auto:-${HOME}/android/evolution}}"
+
+# ROM (platform agacinin kok dizini) AOSP_ROOT ile ayni yerdir. Oncelik
+# sirasi ROM -> AOSP_ROOT -> PROJECT_ROOT/rom. Boylece script
+# "bash scripts/..." ile (login shell olmadan) calistiginda da AOSP_ROOT
+# uzerinden dogru yolu bulur; login shell'de verilen ROM de korunur.
+export ROM="${ROM:-${AOSP_ROOT}}"
 
 # Python yorumlayicisi (verify_patch_bases.py vb. betikler icin)
-: "${PY:=python3}"
+export PY="${PY:-python3}"
 
-export DEVICE_TREE_DIR PROJECT_ROOT ROM AOSP_ROOT PY
+export DEVICE_TREE_DIR
 
 # --- log yardimcilari -------------------------------------------------------
 # Renkler, terminal destekliyse aktif olur.

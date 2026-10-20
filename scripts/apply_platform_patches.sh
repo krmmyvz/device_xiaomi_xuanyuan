@@ -13,8 +13,18 @@
 # Aksi halde yamasiz build sessizce devam eder.
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/env.sh"
 
+# DOGRULAMA: 'source .../env.sh' ifadesi, ust dizine cd basarisiz olursa
+# BOZUK BIR YOL uretir ("/env.sh") ve env.sh hic yuklenmez; sonraki
+# degiskenler de yanlis degerlerle dolar. NAS uzerindeki bir agac
+# ara sira erisilemez oldugu icin bu gercekten olur. Yukleme sonrasi
+# env.sh'in gercekten yuklendigini ve yollarin dogru oldugunu dogrula.
+[[ -n "${DEVICE_TREE_DIR:-}" ]] || die "env.sh yuklenemedi (beklenen: $0 ust dizinindeki env.sh)"
+
 ROMBASE="${ROM:-${PROJECT_ROOT}/rom}"
-TREE="$ROMBASE/device_xiaomi_xuanyuan"
+# Platform agacindaki cihaz agacinin YOLU: <AOSP>/device/xiaomi/xuanyuan
+# (onceki hata: "device/xiaomi_xuanyuan" - "xiaomi/" segmenti atlanmis,
+#  boylece PATCH_DIR her zaman "yok" gorunuyordu).
+TREE="$ROMBASE/device/xiaomi/xuanyuan"
 PATCH_DIR="$TREE/build-support/platform-patches"
 AOSP="${AOSP_ROOT:-${HOME}/android/evolution}"
 
