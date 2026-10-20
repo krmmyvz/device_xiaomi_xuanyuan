@@ -146,13 +146,18 @@ Disk su an: ${AVAIL_GB} GB bos
 
 Derleme adimlari (root olmayan kullanici olarak):
 
-  repo init -u https://github.com/Evolution-X/manifest -b bka
+  # 1) manifest kurulumu.
+  #    Pinned manifest REMOTE/DEFAULT tanimlamaz - onlar local_manifests.xml'de.
+  #    Iki manifest ayni remote'u farkli fetch ile tanimlarsa repo sync
+  #    "remote ... already exists with different attributes" ile durur.
+  repo init -u https://github.com/Evolution-X/manifest -b bka --depth=1
+  cp <device-tree>/build-support/evox-manifest-pinned.xml .repo/manifests/default.xml
+  rm -f .repo/local_manifests
   mkdir -p .repo/local_manifests
-  cp <device-tree>/build-support/evox-manifest-pinned.xml .repo/local_manifests/
-  cp <device-tree>/build-support/local_manifests.xml       .repo/local_manifests/
+  cp <device-tree>/build-support/local_manifests.xml .repo/local_manifests/local_manifests.xml
 
   # ~131 GB (checkout+.git); --depth=1 .git'i kucultur, checkout ayni kalir
-  repo sync -c --depth=1 -j\$(nproc)
+  repo sync -c -j\$(nproc)
 
   # vendor blob agacini yerlestir (cihazdan uretilmis, git disi)
   bash <device-tree>/scripts/install_vendor_tree.sh

@@ -24,11 +24,15 @@
 
 ```bash
 # 1) platform kaynagi
-repo init -u https://github.com/Evolution-X/manifest -b bka
+#    Pinned manifest REMOTE/DEFAULT tanimlamaz - onlar local_manifests.xml'de.
+#    Ayni remote iki manifest icinde farkli fetch ile tanimlanirsa repo sync
+#    "remote ... already exists with different attributes" ile durur.
+repo init -u https://github.com/Evolution-X/manifest -b bka --depth=1
+cp build-support/evox-manifest-pinned.xml .repo/manifests/default.xml
+rm -f .repo/local_manifests
 mkdir -p .repo/local_manifests
-cp build-support/evox-manifest-pinned.xml .repo/local_manifests/
-cp build-support/local_manifests.xml       .repo/local_manifests/
-repo sync -c
+cp build-support/local_manifests.xml .repo/local_manifests/local_manifests.xml
+repo sync -c -j$(nproc)
 
 # 2) proprietary payload'lari tasi (MiuiCamera APK, stok init scriptleri, kamera compat)
 bash scripts/sync_proprietary.sh
