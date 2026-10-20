@@ -22,3 +22,7 @@ __pycache__/
 /prebuilts/product/
 /rootdir/
 /neoteric_compat/
+
+# macOS
+.DS_Store
+._*
