@@ -1,0 +1,31 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+soong_namespace {
+    imports: [
+        "hardware/xiaomi",
+        "hardware/qcom-caf/bootctrl",
+    ],
+}
+
+mkdir {
+    name: "vendor_modem_firmware_mountpoint",
+    dir: "modem_firmware",
+    vendor: true,
+}
+
+mkdir {
+    name: "product_vm_system_mountpoint",
+    dir: "vm-system",
+    product_specific: true,
+}
+
+// Recovery-only QTI Boot Control wrapper for fastbootd.
+cc_binary {
+    name: "android.hardware.boot-service.qti.recovery-xuanyuan",
+    stem: "android.hardware.boot-service.qti.recovery",
+    defaults: ["android.hardware.boot-service.qti.recovery_defaults"],
+    static_libs: ["libgptutils.qti"],
+}

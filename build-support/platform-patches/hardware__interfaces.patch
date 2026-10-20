@@ -1,0 +1,126 @@
+diff --git a/audio/aidl/default/Android.bp b/audio/aidl/default/Android.bp
+index 48c1fefcf5..1a7836449f 100644
+--- a/audio/aidl/default/Android.bp
++++ b/audio/aidl/default/Android.bp
+@@ -42,6 +42,7 @@ cc_defaults {
+ 
+ cc_library {
+     name: "libaudioserviceexampleimpl",
++    installable: false,
+     defaults: [
+         "aidlaudioservice_defaults",
+         "latest_android_media_audio_common_types_ndk_shared",
+diff --git a/bluetooth/audio/utils/Android.bp b/bluetooth/audio/utils/Android.bp
+index 4e247606db..4689a13be4 100644
+--- a/bluetooth/audio/utils/Android.bp
++++ b/bluetooth/audio/utils/Android.bp
+@@ -7,6 +7,13 @@ package {
+     default_applicable_licenses: ["hardware_interfaces_license"],
+ }
+ 
++// Public build headers for the stock vendor session implementation.
++cc_library_headers {
++    name: "xuanyuan_bluetooth_audio_session_headers",
++    vendor: true,
++    export_include_dirs: ["aidl_session"],
++}
++
+ cc_library_shared {
+     name: "libbluetooth_audio_session",
+     defaults: ["hidl_defaults"],
+diff --git a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp
+index 7fe1562f29..47c33f382a 100644
+--- a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp
++++ b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp
+@@ -385,6 +385,11 @@ void BluetoothAudioSession::ReportAudioConfigChanged(
+   }
+ }
+ 
++// Legacy callers are primary Audio HALs, matching SessionControl's default.
++bool BluetoothAudioSession::IsSessionReady() {
++  return IsSessionReady(true);
++}
++
+ bool BluetoothAudioSession::IsSessionReady(bool is_primary_hal) {
+   std::lock_guard<std::recursive_mutex> guard(mutex_);
+ 
+diff --git a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h
+index 023fc4d249..6cd2473c4e 100644
+--- a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h
++++ b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h
+@@ -117,6 +117,8 @@ class BluetoothAudioSession {
+    * @param: is_primary_hal - indicates which hal calls it
+    * @return: true if the Bluetooth stack has started the specified session
+    ***/
++  // Preserve the pre-Android 16 ABI used by vendor primary Audio HALs.
++  bool IsSessionReady();
+   bool IsSessionReady(bool is_primary_hal);
+ 
+   /***
+diff --git a/sensors/aidl/multihal/Android.bp b/sensors/aidl/multihal/Android.bp
+index ef8fa05291..3723a8b7d2 100644
+--- a/sensors/aidl/multihal/Android.bp
++++ b/sensors/aidl/multihal/Android.bp
+@@ -41,7 +41,7 @@ cc_binary {
+         "android.hardware.sensors@2.X-multihal.header",
+         "android.hardware.sensors@2.X-shared-utils",
+     ],
+-    init_rc: ["android.hardware.sensors-service-multihal.rc"],
++    // xuanyuan installs the stock RC (including the Xiaomi audio socket) in device.mk.
+     vintf_fragment_modules: ["android.hardware.sensors-multihal.xml"],
+     shared_libs: [
+         "android.hardware.sensors@2.0-ScopedWakelock",
+diff --git a/wifi/aidl/default/Android.bp b/wifi/aidl/default/Android.bp
+index eb371c7d92..d66f2d54ef 100644
+--- a/wifi/aidl/default/Android.bp
++++ b/wifi/aidl/default/Android.bp
+@@ -109,19 +109,29 @@ cc_library_static {
+         "android.hardware.wifi-V4-ndk",
+     ],
+ 
++    // The xuanyuan vendor libwifi-hal is prebuilt and cannot export the
++    // source-tree headers that the AIDL service consumes.
++    header_libs: ["wifi_legacy_headers"],
++    include_dirs: ["frameworks/opt/net/wifi/libwifi_hal/include"],
++
+     export_include_dirs: ["."],
+ }
+ 
+ vintf_fragment {
+     name: "android.hardware.wifi-service.xml",
+-    src: "android.hardware.wifi-service.xml",
++    // Keep the unused AOSP fragment distinct from the stock xuanyuan fragment.
++    src: "android.hardware.wifi-service-aosp.xml",
+     vendor: true,
+ }
+ 
+ cc_binary {
+     name: "android.hardware.wifi-service",
++    // xuanyuan uses the Xiaomi stock Wi-Fi HAL prebuilt.
++    installable: false,
+     relative_install_path: "hw",
+     proprietary: true,
++    header_libs: ["wifi_legacy_headers"],
++    include_dirs: ["frameworks/opt/net/wifi/libwifi_hal/include"],
+     cppflags: [
+         "-Wall",
+         "-Werror",
+@@ -141,7 +151,8 @@ cc_binary {
+         "android.hardware.wifi-V4-ndk",
+     ],
+     static_libs: ["android.hardware.wifi-service-lib"],
+-    init_rc: ["android.hardware.wifi-service.rc"],
++    // installable:false does not suppress attached init_rc installation rules.
++    // The selected Xiaomi prebuilt owns android.hardware.wifi-service.rc.
+     vintf_fragment_modules: ["android.hardware.wifi-service.xml"],
+ }
+ 
+@@ -151,6 +162,8 @@ cc_binary {
+     cflags: ["-DLAZY_SERVICE"],
+     relative_install_path: "hw",
+     proprietary: true,
++    header_libs: ["wifi_legacy_headers"],
++    include_dirs: ["frameworks/opt/net/wifi/libwifi_hal/include"],
+     cppflags: [
+         "-Wall",
+         "-Werror",

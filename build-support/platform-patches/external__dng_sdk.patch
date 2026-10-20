@@ -1,0 +1,31 @@
+diff --git a/source/dng_lossless_jpeg.cpp b/source/dng_lossless_jpeg.cpp
+index 4405886..2943e7f 100644
+--- a/source/dng_lossless_jpeg.cpp
++++ b/source/dng_lossless_jpeg.cpp
+@@ -40,3 +40,26 @@ void EncodeLosslessJPEG<Scalar> (const uint16 *srcData,
+ #endif
+ 
+ /*****************************************************************************/
++
++// Compatibility ABI for camera blobs built against the pre-1.7 DNG SDK,
++// before EncodeLosslessJPEG became a SIMDType template.
++void EncodeLosslessJPEG (const uint16 *srcData,
++						 uint32 srcRows,
++						 uint32 srcCols,
++						 uint32 srcChannels,
++						 uint32 srcBitDepth,
++						 int32 srcRowStep,
++						 int32 srcColStep,
++						 dng_stream &stream)
++	{
++	EncodeLosslessJPEG<Scalar> (srcData,
++								srcRows,
++								srcCols,
++								srcChannels,
++								srcBitDepth,
++								srcRowStep,
++								srcColStep,
++								stream);
++	}
++
++/*****************************************************************************/

@@ -1,0 +1,12 @@
+diff --git a/NfcNci/AndroidManifest.xml b/NfcNci/AndroidManifest.xml
+index e6998dddb..d6fd9be28 100755
+--- a/NfcNci/AndroidManifest.xml
++++ b/NfcNci/AndroidManifest.xml
+@@ -79,7 +79,6 @@
+                  android:label="@string/app_name"
+                  android:theme="@android:style/Theme.Material.Light"
+                  android:persistent="true"
+-                 android:persistentWhenFeatureAvailable="android.hardware.nfc.any"
+                  android:restoreAnyVersion="true"
+                  android:backupAgent="com.android.nfc.NfcBackupAgent"
+                  android:killAfterRestore="false"

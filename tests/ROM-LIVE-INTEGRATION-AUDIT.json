@@ -1,0 +1,331 @@
+[
+  {
+    "devicePath": "/system/lib64/libprocessgroup.so",
+    "status": "source-build",
+    "sha256": "bdfc9acd67fc335e7bd93dab2c08f0f445b48324c3d62d0da57b24541fa5e73c",
+    "owner": "system/core/libprocessgroup"
+  },
+  {
+    "devicePath": "/system/build.prop",
+    "status": "source-build",
+    "sha256": "9ad43d3f2bc336fa3cd80f2187c112de35fe43083fbc22a210f2d09eab2e7407",
+    "owner": "device/xiaomi/xuanyuan/system.prop"
+  },
+  {
+    "devicePath": "/system/xbin/overlay_remounter",
+    "status": "source-build",
+    "sha256": "17642457854533bf7d08263e6612b794076f910e44cf8490531fe426b3ec1bb6",
+    "owner": "system/core/overlay_remounter (original restored)"
+  },
+  {
+    "devicePath": "/product/priv-app/MiuiCamera/MiuiCamera.apk",
+    "status": "identical",
+    "sha256": "74b45af146e809c807497aa62a599a5955fc27e89244c934ccd7c8b7400de2e6",
+    "owner": "device\\xiaomi\\xuanyuan\\prebuilts\\miuicamera\\product\\priv-app\\MiuiCamera\\MiuiCamera.apk"
+  },
+  {
+    "devicePath": "/product/overlay/xuanyuan_a16_SystemUIRes.apk",
+    "status": "source-build",
+    "sha256": "f58eedb2ba74d6a59a45594f9873f6ae1bb6ab63eec83a7e707d842a65d11b79",
+    "owner": "device/xiaomi/xuanyuan/rro_a16/SystemUIRes"
+  },
+  {
+    "devicePath": "/vendor/lib64/vendor.xiaomi.hardware.camera.injection-client.so",
+    "status": "identical",
+    "sha256": "9bc78fe8a7fb88f6718897c26e0463e08b060cfc950db40d2f9c150549c0039a",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\vendor.xiaomi.hardware.camera.injection-client.so"
+  },
+  {
+    "devicePath": "/vendor/lib64/vendor.xiaomi.hardware.camera.injection-service.so",
+    "status": "identical",
+    "sha256": "8274ce21f7e564b089c5bbeb8086ebe04c7d0c20b463e84374084ad86a456cf2",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\vendor.xiaomi.hardware.camera.injection-service.so"
+  },
+  {
+    "devicePath": "/vendor/lib64/vendor.xiaomi.hardware.camera.injection-V1-ndk.so",
+    "status": "identical",
+    "sha256": "627b56b7e5ca2ce85fde4ebcbed322601194d6ba52d6a71c05e6d75725739712",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\vendor.xiaomi.hardware.camera.injection-V1-ndk.so"
+  },
+  {
+    "devicePath": "/vendor/lib64/libudfpshandler.so",
+    "status": "source-build",
+    "sha256": "8a6137adefbd4261864b87c31818106657e86dff3d55438a3024bea0556f86dd",
+    "owner": "device/xiaomi/xuanyuan/udfps"
+  },
+  {
+    "devicePath": "/vendor/lib64/libwifi-system-iface.so",
+    "status": "identical",
+    "sha256": "b459ea89648bb8133fdd967c2cf21a5a65cced6511e1641483b92ab869d622e3",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\libwifi-system-iface.so"
+  },
+  {
+    "devicePath": "/vendor/etc/audio/vendor_audio_interfaces.xml",
+    "status": "identical",
+    "sha256": "f0a435bfcde4c7de45c4b08c9fe6e00da713ff0d4312d0dfc50e9abd3ecc7272",
+    "owner": "device\\xiaomi\\xuanyuan\\configs\\audio\\vendor_audio_interfaces.xml"
+  },
+  {
+    "devicePath": "/vendor/etc/init/android.hardware.wifi-service.rc",
+    "status": "identical",
+    "sha256": "392ddaa25fcf242c88368e6a59e261c0074215dce02d0eddda60340b804e52bd",
+    "owner": "device\\xiaomi\\xuanyuan\\configs\\wifi\\android.hardware.wifi-service.rc"
+  },
+  {
+    "devicePath": "/vendor/etc/vintf/manifest/android.hardware.wifi-service.xml",
+    "status": "identical",
+    "sha256": "aafd5d3e1324053fe68c189df99f7fe0f9b9cb308a7c7fb2115678954653916e",
+    "owner": "device\\xiaomi\\xuanyuan\\configs\\wifi\\android.hardware.wifi-service.xml"
+  },
+  {
+    "devicePath": "/vendor/bin/hw/android.hardware.wifi-service",
+    "status": "identical",
+    "sha256": "5176539b2d475c1113ade5c8604321876bb1a672f6b26d625ad2550aac98d3b7",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\bin\\hw\\android.hardware.wifi-service"
+  },
+  {
+    "devicePath": "/odm/etc/audio_policy_configuration.xml",
+    "status": "identical",
+    "sha256": "18ff6377006e35915a0026597783656e191e47a518ea6cad023a4ebcec5d28f4",
+    "owner": "device\\xiaomi\\xuanyuan\\configs\\audio\\audio_policy_configuration.xml"
+  },
+  {
+    "devicePath": "/odm/etc/camera/camxoverridesettings.txt",
+    "status": "identical",
+    "sha256": "89c9c48b9b3dcc4a4968f2e29d77f4880f2ce6504e50aefc3a89f3a9001729c8",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\etc\\camera\\camxoverridesettings.txt"
+  },
+  {
+    "devicePath": "/odm/etc/camera/xiaomi/satsnapshot.json",
+    "status": "identical",
+    "sha256": "9663d0919d1ac40760609866de56405c20896ffe31a0bb5171bde5867b0a7260",
+    "owner": "device\\xiaomi\\xuanyuan\\configs\\camera\\satsnapshot-hdr-compatible.json"
+  },
+  {
+    "devicePath": "/odm/etc/camera/xiaomi/mivisettings.json",
+    "status": "identical",
+    "sha256": "4b80914518e6b1b8015f8d3eb7f7e38b47c89a974d654b9c75b54731c9dda0e5",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\etc\\camera\\xiaomi\\mivisettings.json"
+  },
+  {
+    "devicePath": "/odm/etc/init/zz-camera-provider-compat.rc",
+    "status": "missing-owner",
+    "sha256": "29d80894bd5efc50279ee3f900c59352ef3b0dbacb9aad59e48b5a96780b94ee",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\etc\\init\\zz-camera-provider-compat.rc"
+  },
+  {
+    "devicePath": "/odm/etc/audio_policy_configuration.xml.debug-disabled-20261009",
+    "status": "excluded-experiment",
+    "sha256": null
+  },
+  {
+    "devicePath": "/odm/etc/audio/vendor_audio_interfaces.xml",
+    "status": "content-diff",
+    "sha256": "9e5558e210f09aa1c986671e4bbe5653c054e19c7dd8ff509a0f49e8dd2b439d",
+    "owner": "device\\xiaomi\\xuanyuan\\configs\\audio\\vendor_audio_interfaces.xml"
+  },
+  {
+    "devicePath": "/odm/etc/audio/sku_sun/vendor_audio_interfaces.xml",
+    "status": "content-diff",
+    "sha256": "9e5558e210f09aa1c986671e4bbe5653c054e19c7dd8ff509a0f49e8dd2b439d",
+    "owner": "device\\xiaomi\\xuanyuan\\configs\\audio\\vendor_audio_interfaces.xml"
+  },
+  {
+    "devicePath": "/odm/lib64/camera/components/com.qti.node.dewarp.so",
+    "status": "identical",
+    "sha256": "35684056a9bdb9e0afa3659c17b668062e41746377da243276845d7dd7d76607",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\camera\\components\\com.qti.node.dewarp.so"
+  },
+  {
+    "devicePath": "/odm/lib64/camera/dynamicplugins/com.xiaomi.plugin.mialgoallinone.so",
+    "status": "identical",
+    "sha256": "02d612ef221b922fb4dae868f7d24152018e8198e704ba17a29c344b1d6d82eb",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\camera\\dynamicplugins\\com.xiaomi.plugin.mialgoallinone.so"
+  },
+  {
+    "devicePath": "/odm/lib64/hw/camera.qcom.so",
+    "status": "identical",
+    "sha256": "72301dc53bcfc8240427573eaa4f11a72dbd5b4b3206c028c7659b9ff1d8575b",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\hw\\camera.qcom.so"
+  },
+  {
+    "devicePath": "/odm/lib64/hw/com.qti.chi.override.so",
+    "status": "identical",
+    "sha256": "16917a2583ca16aeed0fcf37b25b52b0dbc18c48423377aae0a7acfc972c4354",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\hw\\com.qti.chi.override.so"
+  },
+  {
+    "devicePath": "/odm/lib64/hw/camera.qcom.sm8750.so",
+    "status": "identical",
+    "sha256": "aee10aaedd889aba8387acc6831f36bec25eedb3519ac18a97b18a6476e060e3",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\hw\\camera.qcom.sm8750.so"
+  },
+  {
+    "devicePath": "/odm/lib64/hw/com.qti.chi.offline.so",
+    "status": "identical",
+    "sha256": "91b708c6bcf4f61ca29f187ebcb0d9080acb71e8d8380e16b2db1f4d23e36c79",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\hw\\com.qti.chi.offline.so"
+  },
+  {
+    "devicePath": "/odm/lib64/hw/mapper.qti.so",
+    "status": "elf-code-diff",
+    "sha256": "3dd9ef132c54c54e6b39a9e21b3beb66575cec9d1f8837b590e2b55a27708dba",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\hw\\mapper.qti.so",
+    "liveOnlyNeeded": [],
+    "sourceOnlyNeeded": [],
+    "stock303SameCode": true,
+    "stock303Path": "D:\\xuanyuan-303\\blob-source\\vendor\\lib64\\hw\\mapper.qti.so",
+    "stock303LiveOnlyNeeded": []
+  },
+  {
+    "devicePath": "/odm/lib64/libchifeature2.so",
+    "status": "identical",
+    "sha256": "ace09446c3558a2c06b3b3656afcb3a054b58d0a48e23bf096e18b40013a401d",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\libchifeature2.so"
+  },
+  {
+    "devicePath": "/odm/lib64/com.qualcomm.qti.mcx.usecase.extension.so",
+    "status": "identical",
+    "sha256": "7c73a27a1f283e279f4db35f8fd782826480e0e110eb93b908f3373f90edb860",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qualcomm.qti.mcx.usecase.extension.so"
+  },
+  {
+    "devicePath": "/odm/lib64/com.qualcomm.mcx.distortionmapper.so",
+    "status": "identical",
+    "sha256": "995b278dd0a82523e1a67d1c894186b7dff7f78bc4e4f8a295d9f59c11250bb3",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qualcomm.mcx.distortionmapper.so"
+  },
+  {
+    "devicePath": "/odm/lib64/com.qualcomm.mcx.linearmapper.so",
+    "status": "identical",
+    "sha256": "642eedbe1025a499c834c65bf630c065eb10fe4cf2fd1238df3a97967b495836",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qualcomm.mcx.linearmapper.so"
+  },
+  {
+    "devicePath": "/odm/lib64/com.qualcomm.mcx.nonlinearmapper.so",
+    "status": "identical",
+    "sha256": "0c60546e6c209f3e77fe5fec41c77836fcc4dae12792f8a88025d45d400212cb",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qualcomm.mcx.nonlinearmapper.so"
+  },
+  {
+    "devicePath": "/odm/lib64/com.qualcomm.mcx.policy.mfl.so",
+    "status": "identical",
+    "sha256": "bcc57053db45b7536e9882896958c34a56d9b54deb980d38ccdeae78c0f30635",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qualcomm.mcx.policy.mfl.so"
+  },
+  {
+    "devicePath": "/odm/lib64/com.qualcomm.mcx.policy.sfl.so",
+    "status": "identical",
+    "sha256": "26ff2a15e1ea28ac59c374e3ddd4615991b583b6e2e906091289eed0d13667af",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qualcomm.mcx.policy.sfl.so"
+  },
+  {
+    "devicePath": "/odm/lib64/libmicamera_adapter.so",
+    "status": "identical",
+    "sha256": "23291595b3d259e37b3c9e9ffd287287e753e35fa654b951c7d1df969fc323df",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\libmicamera_adapter.so"
+  },
+  {
+    "devicePath": "/odm/lib64/libcommonchiutils.so",
+    "status": "identical",
+    "sha256": "e75bc483c8f527a5ac02a122a01bfbbbe035a0f2c922d24475d2fa55b05d567f",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\libcommonchiutils.so"
+  },
+  {
+    "devicePath": "/odm/lib64/libcom.qti.chinodeutils.so",
+    "status": "identical",
+    "sha256": "2b66f1a76dc5b2375d947ad345001b750b6555dea5f4689738b09b9e904538d5",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\libcom.qti.chinodeutils.so"
+  },
+  {
+    "devicePath": "/odm/lib64/com.qti.camx.chiiqutils.so",
+    "status": "identical",
+    "sha256": "32675c2f94ddc491d543f9c7444034333d5cf4a7565568e67e90e458faedf91c",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qti.camx.chiiqutils.so"
+  },
+  {
+    "devicePath": "/odm/lib64/libcamera_heap_compat.so",
+    "status": "missing-owner",
+    "sha256": "8f0f809b605fef71097b1aacf21dee331ced9747d7fe91d31b32a7715c3bc6ca",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\libcamera_heap_compat.so"
+  },
+  {
+    "devicePath": "/odm/lib64/libtinyxml2.so",
+    "status": "missing-owner",
+    "sha256": "a1ccedf9d850ba83a646460532de4d2fa783c8d5a3f3643931dcee3d13eea6f0",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\libtinyxml2.so",
+    "stock303SameCode": true,
+    "stock303Path": "D:\\xuanyuan-303\\blob-source\\vendor\\lib64\\libtinyxml2.so",
+    "stock303LiveOnlyNeeded": []
+  },
+  {
+    "devicePath": "/odm/lib64/vendor.qti.hardware.display.snapalloc-impl.so",
+    "status": "elf-code-diff",
+    "sha256": "879e416d953a6c81c5d4d456c850e497e0521c9b38df798adfe39b0c22392819",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\vendor.qti.hardware.display.snapalloc-impl.so",
+    "liveOnlyNeeded": [],
+    "sourceOnlyNeeded": [],
+    "stock303SameCode": true,
+    "stock303Path": "D:\\xuanyuan-303\\blob-source\\vendor\\lib64\\vendor.qti.hardware.display.snapalloc-impl.so",
+    "stock303LiveOnlyNeeded": []
+  },
+  {
+    "devicePath": "/odm/lib64/libgralloctypes.so",
+    "status": "missing-owner",
+    "sha256": "2a4c66300e9d383355c731ec872bef0cadc9e2cc1120a68c2cdbf2a5502d8441",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\libgralloctypes.so",
+    "stock303SameCode": true,
+    "stock303Path": "D:\\xuanyuan-303\\blob-source\\vendor\\lib64\\libgralloctypes.so",
+    "stock303LiveOnlyNeeded": []
+  },
+  {
+    "devicePath": "/odm/lib64/libmapperutils.so",
+    "status": "elf-code-diff",
+    "sha256": "0bad74f9c40874b44beeb1c9d40291594da51432d7e6d20c4e31a3981d7a722a",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\vendor\\lib64\\libmapperutils.so",
+    "liveOnlyNeeded": [],
+    "sourceOnlyNeeded": [],
+    "stock303SameCode": true,
+    "stock303Path": "D:\\xuanyuan-303\\blob-source\\vendor\\lib64\\libmapperutils.so",
+    "stock303LiveOnlyNeeded": []
+  },
+  {
+    "devicePath": "/odm/lib64/com.qti.settings.sm8750.so",
+    "status": "identical",
+    "sha256": "07020fcbcc1807d4e6c12ed8bd8d60649c215bd7d24ecda158884f3c8dcd386b",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\com.qti.settings.sm8750.so"
+  },
+  {
+    "devicePath": "/odm/lib64/libmicamera_hal_policy.so",
+    "status": "identical",
+    "sha256": "561bde53b0ceaaa7b2de5e20bd239d047cba1738e304ce02c8a3c56eab84205c",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\libmicamera_hal_policy.so"
+  },
+  {
+    "devicePath": "/odm/lib64/libqc_hal.so",
+    "status": "identical",
+    "sha256": "1dfbf74a99c8004d35b7cc46eff0c9aeabdbad99d43885ca37138cac125c788e",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\lib64\\libqc_hal.so"
+  },
+  {
+    "devicePath": "/odm/lib64/camera303-compat/libui.so",
+    "status": "identical",
+    "sha256": "bc026eba57d19a4300951daea9e3842acd4e9695a6765f8ba70f3f141d77009d",
+    "owner": "device\\xiaomi\\xuanyuan\\prebuilts\\camera\\lib64\\libui.so"
+  },
+  {
+    "devicePath": "/odm/lib64/camera303-compat/libc++.so.not-loaded",
+    "status": "excluded-experiment",
+    "sha256": null
+  },
+  {
+    "devicePath": "/odm/bin/hw/vendor.qti.camera.provider-service_64.compat",
+    "status": "elf-same-code",
+    "sha256": "21daecd3c398d905b26276dacfc6219c8227ff8a59965310688609af39feab45",
+    "owner": "vendor\\xiaomi\\xuanyuan\\proprietary\\odm\\bin\\hw\\vendor.qti.camera.provider-service_64",
+    "liveOnlyNeeded": [
+      "libcamera_heap_compat.so"
+    ],
+    "sourceOnlyNeeded": []
+  }
+]

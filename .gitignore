@@ -1,0 +1,24 @@
+# Local host authorization is not a distributable build input.
+/recovery/adb_keys
+__pycache__/
+*.pyc
+.superpowers/
+*.bak*
+*.before-*
+*.pre-*
+*.orig
+*.fix6.bak
+
+# ---------------------------------------------------------------------------
+# Xiaomi'ye ait ORIJINAL binary'ler - bu repo PRIVATE olmalidir.
+# Private repodan build-time'da scripts/sync_proprietary.sh ile gelirler.
+# ASLA commit edilmez.
+# ---------------------------------------------------------------------------
+/prebuilts/miuicamera/
+/prebuilts/camera/
+/prebuilts/esim/
+/prebuilts/stock-codecs/
+/prebuilts/stock/
+/prebuilts/product/
+/rootdir/
+/neoteric_compat/

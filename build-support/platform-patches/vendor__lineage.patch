@@ -1,0 +1,25 @@
+diff --git a/build/soong/Android.bp b/build/soong/Android.bp
+index a4345262..c95b9217 100644
+--- a/build/soong/Android.bp
++++ b/build/soong/Android.bp
+@@ -87,8 +87,8 @@ bootstrap_go_package {
+ 
+ cc_defaults {
+     name: "generated_kernel_header_defaults",
+-    generated_headers: ["generated_kernel_includes"],
+-    export_generated_headers: ["generated_kernel_includes"],
++    generated_headers: ["prebuilt_kernel_includes"],
++    export_generated_headers: ["prebuilt_kernel_includes"],
+     vendor_available: true,
+     recovery_available: true,
+ }
+diff --git a/release/flag_values/bp4a/RELEASE_PLATFORM_SECURITY_PATCH.textproto b/release/flag_values/bp4a/RELEASE_PLATFORM_SECURITY_PATCH.textproto
+index 8d173bc0..de4677f5 100644
+--- a/release/flag_values/bp4a/RELEASE_PLATFORM_SECURITY_PATCH.textproto
++++ b/release/flag_values/bp4a/RELEASE_PLATFORM_SECURITY_PATCH.textproto
+@@ -1,4 +1,4 @@
+ name: "RELEASE_PLATFORM_SECURITY_PATCH"
+ value {
+-  string_value: "2026-10-01"
++  string_value: "2026-06-05"
+ }

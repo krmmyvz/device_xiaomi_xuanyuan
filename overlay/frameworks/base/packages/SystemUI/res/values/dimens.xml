@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Native 1440x3200 panel: 25400 um/in / 521.77 dpi. -->
+    <item name="pixel_pitch" format="float" type="dimen">48.68</item>
+    <!-- Values verified against Xiaomi stock Android 16 DevicesOverlay. -->
+    <dimen name="rounded_corner_content_padding">74px</dimen>
+    <dimen name="status_bar_padding_top">38px</dimen>
+</resources>

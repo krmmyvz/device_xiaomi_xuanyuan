@@ -1,0 +1,16 @@
+diff --git a/core/Makefile b/core/Makefile
+index aecbdf5ba8..d055e367ce 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -1054,7 +1054,10 @@ endif
+ ifdef BOARD_PREBUILT_DTBOIMAGE
+ INSTALLED_DTBOIMAGE_TARGET := $(PRODUCT_OUT)/dtbo.img
+ 
+-ifeq ($(BOARD_AVB_ENABLE),true)
++ifeq ($(BOARD_PREBUILT_DTBOIMAGE_PRESIGNED),true)
++$(INSTALLED_DTBOIMAGE_TARGET): $(BOARD_PREBUILT_DTBOIMAGE)
++	cp $(BOARD_PREBUILT_DTBOIMAGE) $@
++else ifeq ($(BOARD_AVB_ENABLE),true)
+ $(INSTALLED_DTBOIMAGE_TARGET): $(BOARD_PREBUILT_DTBOIMAGE) $(AVBTOOL) $(BOARD_AVB_DTBO_KEY_PATH)
+ 	cp $(BOARD_PREBUILT_DTBOIMAGE) $@
+ 	chmod +w $@

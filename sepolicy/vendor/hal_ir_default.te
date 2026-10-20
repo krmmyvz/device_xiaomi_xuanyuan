@@ -1,0 +1,3 @@
+# Keep access scoped to the IR transmitter rather than generic device nodes.
+type vendor_ir_spi_device, dev_type;
+allow hal_ir_default vendor_ir_spi_device:chr_file rw_file_perms;

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Device-specific AOSP integration. -->
+    <bool name="config_disableWeaverOnUnsecuredUsers">true</bool>
+    <bool name="config_hotswapCapable">true</bool>
+    <bool name="config_automatic_brightness_available">true</bool>
+    <!-- Supply the mapping needed to activate automatic brightness. -->
+    <integer-array name="config_autoBrightnessLevels">
+        <item>10</item>
+        <item>40</item>
+        <item>100</item>
+        <item>400</item>
+        <item>1000</item>
+        <item>4000</item>
+        <item>10000</item>
+    </integer-array>
+    <integer-array name="config_autoBrightnessLcdBacklightValues">
+        <item>8</item>
+        <item>18</item>
+        <item>36</item>
+        <item>65</item>
+        <item>105</item>
+        <item>155</item>
+        <item>215</item>
+        <item>255</item>
+    </integer-array>
+
+    <!-- Xiaomi stock Android 16 display geometry. -->
+    <string translatable="false" name="config_mainBuiltInDisplayCutout">M 0,0 H -40.5 V 146 H 40.5 V 0 H 0 Z</string>
+
+    <!-- Xiaomi stock AOD values mapped to current AOSP resource names. -->
+    <bool name="config_dozeAfterScreenOffByDefault">true</bool>
+    <bool name="config_dozeAlwaysOnDisplayAvailable">true</bool>
+    <bool name="config_dozeAlwaysOnEnabled">true</bool>
+    <integer name="config_screenBrightnessDoze">17</integer>
+    <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.06666667</item>
+    <string translatable="false" name="config_dozeComponent">com.android.systemui/com.android.systemui.doze.DozeService</string>
+</resources>

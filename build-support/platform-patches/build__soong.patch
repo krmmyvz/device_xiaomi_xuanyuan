@@ -1,0 +1,66 @@
+diff --git a/cc/image.go b/cc/image.go
+index 8582e123c..810f6c18f 100644
+--- a/cc/image.go
++++ b/cc/image.go
+@@ -463,6 +463,12 @@ func (c *Module) ExtraImageVariations(ctx android.ImageInterfaceContext) []strin
+ }
+ 
+ func squashVendorSrcs(m *Module) {
++	if prebuilt, ok := m.compiler.(*prebuiltLibraryLinker); ok {
++		// Like source libraries, allow vendor-only inputs on a prebuilt that
++		// leaves its core variant to the source provider.
++		prebuilt.prebuiltLinker.properties.Srcs.AppendSimpleValue(
++			prebuilt.baseCompiler.Properties.Target.Vendor.Srcs)
++	}
+ 	if lib, ok := m.compiler.(*libraryDecorator); ok {
+ 		lib.baseCompiler.Properties.Srcs.AppendSimpleValue(lib.baseCompiler.Properties.Target.Vendor.Srcs)
+ 		lib.baseCompiler.Properties.Exclude_srcs.AppendSimpleValue(lib.baseCompiler.Properties.Target.Vendor.Exclude_srcs)
+diff --git a/cc/prebuilt_test.go b/cc/prebuilt_test.go
+index cade677ee..ef1ad9a9c 100644
+--- a/cc/prebuilt_test.go
++++ b/cc/prebuilt_test.go
+@@ -603,3 +603,26 @@ func TestMissingVariantInModuleSdk(t *testing.T) {
+ 	android.AssertBoolEquals(t, fmt.Sprintf("expected dependency from libfoo to source libbar"), true,
+ 		android.HasDirectDep(ctx, libfoo, sourceLibBar))
+ }
++
++func TestPrebuiltVendorOnlySrcsPreserveCore(t *testing.T) {
++	const bp = `
++cc_library_shared {
++    name: "libvendor_image_prebuilt",
++    vendor_available: true,
++}
++cc_prebuilt_library_shared {
++    name: "libvendor_image_prebuilt",
++    vendor_available: true,
++    prefer: true,
++    target: { vendor: { srcs: ["stock.so"], }, },
++}
++`
++	ctx := testPrebuilt(t, bp, android.MockFS{"stock.so": nil}, android.PrepareForTestWithNamespace)
++	vendor := ctx.ModuleForTests(t, "libvendor_image_prebuilt", "android_vendor_arm64_armv8-a_shared").Module().(*Module)
++	core := ctx.ModuleForTests(t, "libvendor_image_prebuilt", "android_arm64_armv8-a_shared").Module().(*Module)
++	stock := ctx.ModuleForTests(t, "prebuilt_libvendor_image_prebuilt", "android_vendor_arm64_armv8-a_shared").Module().(*Module)
++	android.AssertBoolEquals(t, "vendor uses the preferred prebuilt", false, android.IsModulePreferred(vendor))
++	android.AssertBoolEquals(t, "core stays source built", true, android.IsModulePreferred(core))
++	android.AssertBoolEquals(t, "stock vendor input selected", true, stock.Prebuilt().UsePrebuilt())
++	android.AssertStringEquals(t, "vendor Make name remains distinct", ".vendor", stock.SubName())
++}
+diff --git a/ui/build/soong.go b/ui/build/soong.go
+index c9b303c5b..7ef4e3456 100644
+--- a/ui/build/soong.go
++++ b/ui/build/soong.go
+@@ -226,6 +226,13 @@ func (pb PrimaryBuilderFactory) primaryBuilderInvocation(config Config) bootstra
+ 
+ 	commonArgs = append(commonArgs, "-l", filepath.Join(pb.config.FileListDir(), "Android.bp.list"))
+ 	invocationEnv := make(map[string]string)
++	// The primary builder starts with env -i. Preserve opt-in Go memory
++	// controls so low-memory build hosts can avoid excessive swapping.
++	for _, key := range []string{"GOGC", "GOMEMLIMIT"} {
++		if value := os.Getenv(key); value != "" {
++			invocationEnv[key] = value
++		}
++	}
+ 	if pb.debugPort != "" {
+ 		//debug mode
+ 		commonArgs = append(commonArgs, "--delve_listen", pb.debugPort,

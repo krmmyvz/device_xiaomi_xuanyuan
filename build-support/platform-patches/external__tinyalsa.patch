@@ -1,0 +1,78 @@
+diff --git a/Android.bp b/Android.bp
+index dc107cf..7380c4c 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -17,6 +17,7 @@ license {
+ 
+ cc_library {
+     name: "libtinyalsa",
++    installable: false,
+     host_supported: true,
+     vendor_available: true,
+     product_available: true,
+@@ -43,6 +44,65 @@ cc_library {
+     },
+ }
+ 
++// Xuanyuan keeps the stock vendor library; install framework copies separately.
++cc_library {
++    name: "libtinyalsa_xuanyuan_system",
++    stem: "libtinyalsa",
++    host_supported: false,
++    vendor_available: false,
++    product_available: false,
++    srcs: [
++        "mixer.c",
++        "mixer_hw.c",
++        "mixer_plugin.c",
++        "pcm.c",
++        "pcm_hw.c",
++        "pcm_plugin.c",
++        "snd_utils.c",
++    ],
++    cflags: ["-Werror", "-Wno-macro-redefined"],
++    export_include_dirs: ["include"],
++    local_include_dirs: ["include"],
++
++    target: {
++        darwin: {
++            enabled: false,
++        },
++        bionic: {
++            system_shared_libs: ["libc", "libdl"],
++        },
++    },
++}
++
++cc_library {
++    name: "libtinyalsa_xuanyuan_product",
++    stem: "libtinyalsa",
++    host_supported: false,
++    vendor_available: false,
++    product_specific: true,
++    srcs: [
++        "mixer.c",
++        "mixer_hw.c",
++        "mixer_plugin.c",
++        "pcm.c",
++        "pcm_hw.c",
++        "pcm_plugin.c",
++        "snd_utils.c",
++    ],
++    cflags: ["-Werror", "-Wno-macro-redefined"],
++    export_include_dirs: ["include"],
++    local_include_dirs: ["include"],
++
++    target: {
++        darwin: {
++            enabled: false,
++        },
++        bionic: {
++            system_shared_libs: ["libc", "libdl"],
++        },
++    },
++}
++
+ cc_binary {
+     name: "tinyplay",
+     host_supported: true,

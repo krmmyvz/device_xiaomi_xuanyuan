@@ -1,0 +1,92 @@
+diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsSurfaceView.java b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsSurfaceView.java
+index dae25f71af0f..643760ffa33e 100644
+--- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsSurfaceView.java
++++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsSurfaceView.java
+@@ -21,8 +21,10 @@ import android.annotation.Nullable;
+ import android.content.Context;
+ import android.graphics.drawable.Drawable;
+ import android.graphics.Canvas;
++import android.graphics.Color;
+ import android.graphics.Paint;
+ import android.graphics.PixelFormat;
++import android.graphics.PorterDuff;
+ import android.graphics.RectF;
+ import android.util.AttributeSet;
+ import android.util.Log;
+@@ -70,7 +72,11 @@ public class UdfpsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
+ 
+         mHolder = getHolder();
+         mHolder.addCallback(this);
+-        mHolder.setFormat(PixelFormat.RGBA_8888);
++        // Keep the UDFPS HBM surface transparent until an illumination frame is drawn.
++        // Otherwise a failed/aborted UDFPS session can leave the uninitialized surface
++        // visible as a solid black circle on the keyguard.
++        mHolder.setFormat(PixelFormat.TRANSLUCENT);
++        setBackgroundColor(Color.TRANSPARENT);
+ 
+         mSensorPaint = new Paint(0 /* flags */);
+         mSensorPaint.setAntiAlias(true);
+@@ -82,6 +88,21 @@ public class UdfpsSurfaceView extends SurfaceView implements SurfaceHolder.Callb
+ 
+     @Override public void surfaceCreated(SurfaceHolder holder) {
+         mHasValidSurface = true;
++
++        // SurfaceView buffers are not guaranteed to start transparent. Clear the first
++        // buffer explicitly so an idle UDFPS overlay never appears as a black disk.
++        Canvas clearCanvas = null;
++        try {
++            clearCanvas = mHolder.lockCanvas();
++            if (clearCanvas != null) {
++                clearCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
++            }
++        } finally {
++            if (clearCanvas != null) {
++                mHolder.unlockCanvasAndPost(clearCanvas);
++            }
++        }
++
+         if (mAwaitingSurfaceToStartIllumination) {
+             doIlluminate(mOnDisplayConfigured);
+             mOnDisplayConfigured = null;
+diff --git a/services/core/java/com/android/server/power/hint/HintManagerService.java b/services/core/java/com/android/server/power/hint/HintManagerService.java
+index 9b390621ec39..a05454b4b8c5 100644
+--- a/services/core/java/com/android/server/power/hint/HintManagerService.java
++++ b/services/core/java/com/android/server/power/hint/HintManagerService.java
+@@ -370,7 +370,13 @@ public final class HintManagerService extends SystemService {
+         try {
+             mPowerHalVersion = mPowerHal.getInterfaceVersion();
+             if (mPowerHalVersion >= 6) {
+-                return mPowerHal.getSupportInfo();
++                SupportInfo supportInfo = mPowerHal.getSupportInfo();
++                if (supportInfo != null && supportInfo.headroom != null
++                        && supportInfo.compositionData != null) {
++                    return supportInfo;
++                }
++                Slog.w(TAG, "Power HAL returned incomplete SupportInfo; "
++                        + "falling back to legacy capability detection");
+             }
+         } catch (RemoteException e) {
+             throw new IllegalStateException("Could not contact PowerHAL!", e);
+diff --git a/services/usage/java/com/android/server/usage/StorageStatsService.java b/services/usage/java/com/android/server/usage/StorageStatsService.java
+index 7d24a4ce4273..eef204054611 100644
+--- a/services/usage/java/com/android/server/usage/StorageStatsService.java
++++ b/services/usage/java/com/android/server/usage/StorageStatsService.java
+@@ -276,9 +276,16 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
+             // get the block device size and do just a small rounding if any at all
+             final long totalBytes = mStorage.getInternalStorageBlockDeviceSize();
+             final long totalBytesRounded = FileUtils.roundStorageSize(totalBytes);
+-            // If the storage size is 997GB-999GB, round it to a 1000GB to show
++            // If the storage size is 997GB-999GB, round it to 1000GB to show
+             // 1TB in UI instead of 0.99TB. Same for 2TB, 4TB, 8TB etc.
+-            if (totalBytesRounded - totalBytes <= DataUnit.GIGABYTES.toBytes(3)) {
++            //
++            // Never round down. Some devices (for example Xiaomi UltraSpace)
++            // expose usable storage above the nominal marketing capacity. In
++            // that case roundStorageSize() can return 1000GB for a device that
++            // actually exposes >1000GB, which would make free space exceed
++            // total space and produce negative used/system sizes in Settings.
++            if (totalBytesRounded >= totalBytes
++                    && totalBytesRounded - totalBytes <= DataUnit.GIGABYTES.toBytes(3)) {
+                 return totalBytesRounded;
+             } else {
+                 return totalBytes;

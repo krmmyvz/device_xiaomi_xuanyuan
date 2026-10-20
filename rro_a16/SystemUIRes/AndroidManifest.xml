@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.systemui.xuanyuan.a16"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="36" android:targetSdkVersion="36" />
+    <overlay
+        android:targetPackage="com.android.systemui"
+        android:priority="999"
+        android:isStatic="true" />
+    <application android:hasCode="false" />
+</manifest>

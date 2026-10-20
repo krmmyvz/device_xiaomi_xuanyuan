@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="config_disableWeaverOnUnsecuredUsers">true</bool>
+    <bool name="config_hotswapCapable">true</bool>
+    <bool name="config_automatic_brightness_available">true</bool>
+
+    <!-- Values derived from Xiaomi's stock Android 16 overlays. -->
+    <string translatable="false" name="config_mainBuiltInDisplayCutout">M 0,0 H -40.5 V 146 H 40.5 V 0 H 0 Z</string>
+
+    <!-- MIUI's config_dozeAfterScreenOff maps to AOSP's current resource. -->
+    <bool name="config_dozeAfterScreenOffByDefault">true</bool>
+    <bool name="config_dozeAlwaysOnDisplayAvailable">true</bool>
+    <bool name="config_dozeAlwaysOnEnabled">true</bool>
+
+    <!-- Stock uses integer 17; also provide the normalized AOSP float path. -->
+    <integer name="config_screenBrightnessDoze">17</integer>
+    <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.06666667</item>
+
+    <string translatable="false" name="config_dozeComponent">com.android.systemui/com.android.systemui.doze.DozeService</string>
+
+    <!-- Telephony / IMS capability for xuanyuan -->
+    <bool name="config_device_volte_available">true</bool>
+    <bool name="config_carrier_volte_available">true</bool>
+    <bool name="config_device_vt_available">true</bool>
+    <bool name="config_device_wfc_ims_available">true</bool>
+    <!-- Under-display fingerprint wake/doze support -->
+    <bool name="config_screen_off_udfps_enabled">true</bool>
+    <bool name="config_screen_off_udfps_default_on">true</bool>
+    <string name="config_dozeUdfpsLongPressSensorType" translatable="false">org.lineageos.sensor.udfps</string>
+
+</resources>

@@ -1,0 +1,107 @@
+diff --git a/lib/src/gainmapmath.cpp b/lib/src/gainmapmath.cpp
+index b14be0e..3a9b324 100644
+--- a/lib/src/gainmapmath.cpp
++++ b/lib/src/gainmapmath.cpp
+@@ -1689,4 +1689,48 @@ bool floatToUnsignedFraction(float v, uint32_t* numerator, uint32_t* denominator
+   return floatToUnsignedFractionImpl(v, UINT32_MAX, numerator, denominator);
+ }
+ 
++// Compatibility ABI for camera blobs built against the Android 15 libultrahdr
++// C++ interface. The legacy public types remain declared in ultrahdr.h.
++
++uint8_t encodeGain(float y_sdr, float y_hdr, ultrahdr_metadata_struct* metadata,
++                   float log2MinContentBoost, float log2MaxContentBoost) {
++  float gain = 1.0f;
++  if (y_sdr > 0.0f) {
++    gain = y_hdr / y_sdr;
++  }
++
++  float log2_normalized_gamma_gain = metadata->gamma * log2(gain);
++  log2_normalized_gamma_gain = fmin(log2_normalized_gamma_gain, log2MaxContentBoost);
++  log2_normalized_gamma_gain = fmax(log2_normalized_gamma_gain, log2MinContentBoost);
++
++  return static_cast<uint8_t>((log2_normalized_gamma_gain - log2MinContentBoost) /
++                              (log2MaxContentBoost - log2MinContentBoost) * 255.0f);
++}
++
++Color sampleP010(jpegr_uncompressed_struct* image, size_t map_scale_factor, size_t x, size_t y) {
++  uhdr_raw_image_t current{};
++  current.fmt = image->pixelFormat;
++  current.cg = static_cast<uhdr_color_gamut_t>(image->colorGamut);
++  current.ct = UHDR_CT_UNSPECIFIED;
++  current.range = image->colorRange;
++  current.w = image->width;
++  current.h = image->height;
++  current.planes[UHDR_PLANE_Y] = image->data;
++  current.stride[UHDR_PLANE_Y] = image->luma_stride ? image->luma_stride : image->width;
++  current.planes[UHDR_PLANE_UV] =
++      image->chroma_data
++          ? image->chroma_data
++          : static_cast<void*>(static_cast<uint16_t*>(image->data) +
++                               current.stride[UHDR_PLANE_Y] * image->height);
++  current.stride[UHDR_PLANE_UV] =
++      image->chroma_stride ? image->chroma_stride : current.stride[UHDR_PLANE_Y];
++  return sampleP010(&current, map_scale_factor, x, y);
++}
++
++ColorTransformFn getHdrConversionFn(ultrahdr_color_gamut sdr_gamut,
++                                    ultrahdr_color_gamut hdr_gamut) {
++  return getGamutConversionFn(static_cast<uhdr_color_gamut_t>(sdr_gamut),
++                              static_cast<uhdr_color_gamut_t>(hdr_gamut));
++}
++
+ }  // namespace ultrahdr
+diff --git a/lib/src/jpegrutils.cpp b/lib/src/jpegrutils.cpp
+index 4a00590..0836b4f 100644
+--- a/lib/src/jpegrutils.cpp
++++ b/lib/src/jpegrutils.cpp
+@@ -698,4 +698,30 @@ string generateXmpForSecondaryImage(uhdr_gainmap_metadata_ext_t& metadata) {
+   return ss.str();
+ }
+ 
++// Compatibility ABI for camera blobs built against the Android 15 metadata
++// structure retained in ultrahdr.h.
++string generateXmpForSecondaryImage(ultrahdr_metadata_struct& metadata) {
++  std::stringstream ss;
++  photos_editing_formats::image_io::XmlWriter writer(ss);
++  writer.StartWritingElement("x:xmpmeta");
++  writer.WriteXmlns("x", "adobe:ns:meta/");
++  writer.WriteAttributeNameAndValue("x:xmptk", "Adobe XMP Core 5.1.2");
++  writer.StartWritingElement("rdf:RDF");
++  writer.WriteXmlns("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
++  writer.StartWritingElement("rdf:Description");
++  writer.WriteXmlns(kGainMapPrefix, kGainMapUri);
++  writer.WriteAttributeNameAndValue(kMapVersion, metadata.version);
++  writer.WriteAttributeNameAndValue(kMapGainMapMin, log2(metadata.minContentBoost));
++  writer.WriteAttributeNameAndValue(kMapGainMapMax, log2(metadata.maxContentBoost));
++  writer.WriteAttributeNameAndValue(kMapGamma, metadata.gamma);
++  writer.WriteAttributeNameAndValue(kMapOffsetSdr, metadata.offsetSdr);
++  writer.WriteAttributeNameAndValue(kMapOffsetHdr, metadata.offsetHdr);
++  writer.WriteAttributeNameAndValue(kMapHDRCapacityMin, log2(metadata.hdrCapacityMin));
++  writer.WriteAttributeNameAndValue(kMapHDRCapacityMax, log2(metadata.hdrCapacityMax));
++  writer.WriteAttributeNameAndValue(kMapBaseRenditionIsHDR, "False");
++  writer.FinishWriting();
++
++  return ss.str();
++}
++
+ }  // namespace ultrahdr
+diff --git a/lib/src/multipictureformat.cpp b/lib/src/multipictureformat.cpp
+index 4a82a8b..b3ff0e2 100644
+--- a/lib/src/multipictureformat.cpp
++++ b/lib/src/multipictureformat.cpp
+@@ -90,4 +90,14 @@ std::shared_ptr<DataStruct> generateMpf(size_t primary_image_size, size_t primar
+   return dataStruct;
+ }
+ 
++// Compatibility ABI for camera blobs built against the Android 15 API, whose
++// size arguments were int rather than size_t.
++std::shared_ptr<DataStruct> generateMpf(int primary_image_size, int primary_image_offset,
++                                        int secondary_image_size, int secondary_image_offset) {
++  return generateMpf(static_cast<size_t>(primary_image_size),
++                     static_cast<size_t>(primary_image_offset),
++                     static_cast<size_t>(secondary_image_size),
++                     static_cast<size_t>(secondary_image_offset));
++}
++
+ }  // namespace ultrahdr

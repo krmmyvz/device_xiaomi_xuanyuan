@@ -1,0 +1,20 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// QCOM common owns the standard RFS symlink tree.
+// xuanyuan only needs the stock-specific MPSS MBN config link.
+install_symlink {
+    name: "xuanyuan_rfs_msm_mpss_readonly_mbnconfig",
+    soc_specific: true,
+    installed_location: "rfs/msm/mpss/readonly/mbnconfig",
+    symlink_target: "/data/vendor/mbnconfig",
+}
+
+prebuilt_etc {
+    name: "xuanyuan_rfs_symlinks_sentinel",
+    src: "rfs_symlinks",
+    filename: "rfs_symlinks",
+    sub_dir: "rfs",
+    soc_specific: true,
+}

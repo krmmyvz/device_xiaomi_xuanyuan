@@ -1,0 +1,235 @@
+diff --git a/audio_route/Android.bp b/audio_route/Android.bp
+index fbe23aad..6abce2c6 100644
+--- a/audio_route/Android.bp
++++ b/audio_route/Android.bp
+@@ -26,6 +26,20 @@ cc_defaults {
+ 
+ cc_library_shared {
+     name: "libaudioroute",
++    installable: false,
++    defaults: ["libaudioroute_defaults"],
++    shared_libs: [
++        "libtinyalsa",
++    ],
++}
++
++// Xuanyuan keeps the stock vendor library; install framework copies separately.
++cc_library_shared {
++    name: "libaudioroute_xuanyuan_system",
++    stem: "libaudioroute",
++    host_supported: false,
++    vendor_available: false,
++    product_available: false,
+     defaults: ["libaudioroute_defaults"],
+     shared_libs: [
+         "libtinyalsa",
+diff --git a/audio_utils/Android.bp b/audio_utils/Android.bp
+index 2ae561c0..d7efa9ac 100644
+--- a/audio_utils/Android.bp
++++ b/audio_utils/Android.bp
+@@ -34,6 +34,7 @@ cc_library_headers {
+ 
+ cc_library {
+     name: "libaudioutils",
++    installable: false,
+     vendor_available: true,
+     product_available: true,
+     double_loadable: true,
+@@ -126,6 +127,197 @@ cc_library {
+     },
+ }
+ 
++// Xuanyuan keeps the stock vendor library; install framework copies separately.
++cc_library {
++    name: "libaudioutils_xuanyuan_system",
++    stem: "libaudioutils",
++    host_supported: false,
++    vendor_available: false,
++    product_available: false,
++    double_loadable: true,
++    defaults: [
++        "aconfig_lib_cc_static_link.defaults",
++        "audio_utils_defaults",
++    ],
++    srcs: [
++        "Balance.cpp",
++        "ErrorLog.cpp",
++        "MelAggregator.cpp",
++        "MelProcessor.cpp",
++        "Metadata.cpp",
++        "PowerLog.cpp",
++        "StringUtils.cpp",
++        "TimerQueue.cpp",
++        "channels.cpp",
++        "fifo.cpp",
++        "fifo_index.cpp",
++        "fifo_writer_T.cpp",
++        "format.c",
++        "hal_smoothness.c",
++        "limiter.c",
++        "minifloat.c",
++        "mono_blend.cpp",
++        "mutex.cpp",
++        "power.cpp",
++        "primitives.c",
++        "roundup.c",
++        "sample.c",
++        "threads.cpp",
++    ],
++
++    header_libs: [
++        "libaudio_system_headers",
++        "libutils_headers",
++    ],
++
++    export_header_lib_headers: [
++        "libaudio_system_headers",
++        "libutils_headers",
++    ],
++
++    shared_libs: [
++        "libcutils",
++        "liblog",
++        "libutils",
++        "server_configurable_flags",
++    ],
++
++    whole_static_libs: [
++        "libaudioutils_fastmath",
++    ],
++
++    target: {
++        android: {
++            srcs: [
++                // "mono_blend.cpp",
++                "echo_reference.c",
++                "resampler.c",
++            ],
++            whole_static_libs: [
++                "libaudioutils_fixedfft",
++                // if libaudioutils is added as a static lib AND flags are used in the utils object,
++                // then add server_configurable_flags as a shared lib.
++                "com.android.media.audioserver-aconfig-cc",
++            ],
++            shared_libs: [
++                "libspeexresampler",
++            ],
++        },
++        host: {
++            cflags: ["-D__unused=__attribute__((unused))"],
++            whole_static_libs: [
++                // if libaudioutils is added as a static lib AND flags are used in the utils object,
++                // then add server_configurable_flags as a shared lib.
++                "com.android.media.audioserver-aconfig-cc-ro",
++            ],
++        },
++    },
++    min_sdk_version: "29",
++    static: {
++        // library has C++ code that we don't allow across module boundaries
++        // a static link avoids that cross-module peril.
++        apex_available: [
++            "com.android.media",
++            "com.android.media.swcodec",
++        ],
++    },
++}
++
++cc_library {
++    name: "libaudioutils_xuanyuan_product",
++    stem: "libaudioutils",
++    host_supported: false,
++    vendor_available: false,
++    product_specific: true,
++    double_loadable: true,
++    defaults: [
++        "aconfig_lib_cc_static_link.defaults",
++        "audio_utils_defaults",
++    ],
++    srcs: [
++        "Balance.cpp",
++        "ErrorLog.cpp",
++        "MelAggregator.cpp",
++        "MelProcessor.cpp",
++        "Metadata.cpp",
++        "PowerLog.cpp",
++        "StringUtils.cpp",
++        "TimerQueue.cpp",
++        "channels.cpp",
++        "fifo.cpp",
++        "fifo_index.cpp",
++        "fifo_writer_T.cpp",
++        "format.c",
++        "hal_smoothness.c",
++        "limiter.c",
++        "minifloat.c",
++        "mono_blend.cpp",
++        "mutex.cpp",
++        "power.cpp",
++        "primitives.c",
++        "roundup.c",
++        "sample.c",
++        "threads.cpp",
++    ],
++
++    header_libs: [
++        "libaudio_system_headers",
++        "libutils_headers",
++    ],
++
++    export_header_lib_headers: [
++        "libaudio_system_headers",
++        "libutils_headers",
++    ],
++
++    shared_libs: [
++        "libcutils",
++        "liblog",
++        "libutils",
++        "server_configurable_flags",
++    ],
++
++    whole_static_libs: [
++        "libaudioutils_fastmath",
++    ],
++
++    target: {
++        android: {
++            srcs: [
++                // "mono_blend.cpp",
++                "echo_reference.c",
++                "resampler.c",
++            ],
++            whole_static_libs: [
++                "libaudioutils_fixedfft",
++                // if libaudioutils is added as a static lib AND flags are used in the utils object,
++                // then add server_configurable_flags as a shared lib.
++                "com.android.media.audioserver-aconfig-cc",
++            ],
++            shared_libs: [
++                "libspeexresampler",
++            ],
++        },
++        host: {
++            cflags: ["-D__unused=__attribute__((unused))"],
++            whole_static_libs: [
++                // if libaudioutils is added as a static lib AND flags are used in the utils object,
++                // then add server_configurable_flags as a shared lib.
++                "com.android.media.audioserver-aconfig-cc-ro",
++            ],
++        },
++    },
++    min_sdk_version: "29",
++    static: {
++        // library has C++ code that we don't allow across module boundaries
++        // a static link avoids that cross-module peril.
++        apex_available: [
++            "com.android.media",
++            "com.android.media.swcodec",
++        ],
++    },
++}
++
+ cc_library_static {
+     name: "libaudioutils_fastmath",
+     vendor_available: true,

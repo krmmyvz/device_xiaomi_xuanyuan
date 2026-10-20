@@ -1,0 +1,28 @@
+diff --git a/qti-hidl-wrapper/Android.bp b/qti-hidl-wrapper/Android.bp
+index 7db60fe..e8c60e4 100644
+--- a/qti-hidl-wrapper/Android.bp
++++ b/qti-hidl-wrapper/Android.bp
+@@ -3,7 +3,8 @@ java_library {
+ 
+     name: "qti-telephony-hidl-wrapper",
+     provides_uses_lib: "qti-telephony-hidl-wrapper",
+-    installable: true,
++    // xuanyuan installs the stock runtime JAR; retain this module for compilation.
++    installable: false,
+     system_ext_specific: true,
+     sdk_version: "system_current",
+ 
+diff --git a/qti-utils/Android.bp b/qti-utils/Android.bp
+index 183d392..4d01fe4 100644
+--- a/qti-utils/Android.bp
++++ b/qti-utils/Android.bp
+@@ -2,7 +2,8 @@
+ java_library {
+     name: "qti-telephony-utils",
+     provides_uses_lib: "qti-telephony-utils",
+-    installable: true,
++    // Stock qcrilmsgtunnel needs the stock org.codeaurora.telephony.utils API.
++    installable: false,
+     sdk_version: "system_current",
+ 
+     srcs: ["src/org/**/*.java"],

@@ -1,0 +1,6 @@
+# Xiaomi MI_RIC stability daemon.
+# Stock init rc uses the explicit domain u:r:mi_ric:s0.
+type mi_ric, domain;
+type mi_ric_exec, exec_type, vendor_file_type, file_type;
+
+init_daemon_domain(mi_ric)

@@ -1,0 +1,11 @@
+diff --git a/libs/vibrator/Android.bp b/libs/vibrator/Android.bp
+index d3b3a734f9..84cca76418 100644
+--- a/libs/vibrator/Android.bp
++++ b/libs/vibrator/Android.bp
+@@ -103,5 +103,6 @@ cc_library {
+         "//frameworks/native/libs/vibrator",
+         "//frameworks/native/libs/vibrator/tests",
+         "//frameworks/av/media/libeffects/hapticgenerator",
++        "//vendor:__subpackages__",
+     ],
+ }
