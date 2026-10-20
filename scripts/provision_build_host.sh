@@ -1,12 +1,31 @@
 #!/usr/bin/env bash
-# AOSP derleme ortamını hazırlar - UYGULANACAK MAKİNEDE (Ubuntu/Debian) çalıştır.
+# AOSP/EvoX derleme ortamını hazırlar - VM İÇİNDE çalıştır.
 #
-#   sudo scripts/provision_build_host.sh
+#   sudo scripts/provision_build_host.sh [--swap-gb 16] [--ccache-gb 40]
 #
-# AOSP 16 (Android 16) + Evolution-X bka için gereken tüm bagimliliklar.
-# Diger paketler: git, repo, python3, openjdk-17, ccache, rsync, zstd, vb.
+# Android 16 (bp4a) + Evolution-X bka icin gereken tüm bagimliliklar.
+#
+# Disk plani (olculmus):
+#   repo sync -c              ~131 GB   (checkout + .git)
+#   out/ (tam derleme)        ~138 GB
+#   ccache (opsiyonel)         20-40 GB
+#   toplam                     ~200-310 GB
+#   --depth=1 ile .git belirgin sekilde kuculur; checkout tabanı degismez.
+#
+# Not: repo sync -c icin olculen 131 GB degerinin .git payini icerir.
+#      --depth=1 ile .git kuculur ama calisma agaci (checkout) ayni kalir.
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/env.sh"
 
-set -euo pipefail
+SWAP_GB=16
+CCACHE_GB=40
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --swap-gb) SWAP_GB="$2"; shift ;;
+    --ccache-gb) CCACHE_GB="$2"; shift ;;
+    -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
+    *) die "Bilinmeyen arg: $1" ;;
+  esac
+done
 
 if [[ $EUID -ne 0 ]]; then
   echo "sudo ile calistir: sudo $0" >&2
@@ -15,97 +34,145 @@ fi
 
 log() { printf '\033[36m[+]\033[0m %s\n' "$*"; }
 ok()  { printf '\033[32m[✓]\033[0m %s\n' "$*"; }
+warn(){ printf '\033[33m[!]\033[0m %s\n' "$*" >&2; }
+err() { printf '\033[31m[x]\033[0m %s\n' "$*" >&2; }
 
-log "Sistem bilgisi"
 . /etc/os-release
-echo "  $PRETTY_NAME  ($(uname -r))"
+log "Sistem: $PRETTY_NAME ($(uname -r))"
 
-log "Paket dizini guncelleniyor"
+# ------------------------------------------------------------- disk kontrolu
+AVAIL_GB=$(df -BG --output=avail / | tail -1 | tr -dc '0-9')
+log "Kullanilabilir disk: ${AVAIL_GB} GB"
+if (( AVAIL_GB < 320 )); then
+  warn "Disk ${AVAIL_GB} GB - tam derleme icin ~310 GB gerekli (kaynak+out+ccache)"
+  warn "Sirasiyla denenecek: (1) ccache'i kucult/diske yazma (2) out/ ayri diske (OUT_DIR)"
+  warn "  (3) sadece vendor agacini derle (m vendor/xiaomi/xuanyuan) - ~150 GB yeter"
+fi
+
+# ------------------------------------------------------------- paketler
 export DEBIAN_FRONTEND=noninteractive
+log "Paket dizini guncelleniyor"
 apt-get update -qq
-apt-get upgrade -yqq
 
-log "AOSP derleme bagimliliklari kuruluyor"
+log "AOSP/EvoX derleme bagimliliklari kuruluyor"
 apt-get install -y -qq \
   bc bison build-essential ccache curl flex g++-multilib gcc-multilib \
-  git-core gnupg htop imagemagick lib32readline-dev lib32z1-dev \
+  git-core git-lfs gnupg htop imagemagick lib32readline-dev lib32z1-dev \
   libelf-dev libc6-dev-i386 libgmp-dev liblzo2-dev libncurses5 \
   libpng-dev libsdl1.2-dev libssl-dev libxml2-dev libxml2-utils \
   lzop m4 make pngcrush python3 python3-pip python-is-python3 \
   rsync schedtool squashfs-tools unzip zip zlib1g-dev zstd \
   openjdk-17-jdk-headless device-tree-compiler \
-  ca-certificates curl git-lfs
+  ca-certificates
 
-# Android 16 icin JDK 17 (AOSP 11'den beri 11, AOSP 14+ icin 17)
-if ! update-alternatives --query java 2>/dev/null | grep -q "17"; then
-  log "JDK 17 varsayilan yapiliyor"
-  update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
-fi
+# ------------------------------------------------------------------- JDK 17
+# Android 16 (bp4a) JDK 17 ister. Ubuntu 24.04'te varsayilan JDK 21'dir ve
+# otomatik secilir - bu yuzden acikca 17 kurulup JAVA_HOME sabitleniyor.
+log "JDK 17 yapilandiriliyor (Android 16 = JDK 17; Ubuntu 24.04 varsayilani 21)"
+update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java 2>/dev/null || true
+cat > /etc/profile.d/jdk17.sh <<'EOF'
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH="$JAVA_HOME/bin:$PATH"
+EOF
+chmod 644 /etc/profile.d/jdk17.sh
+grep -q "jdk17.sh" /root/.bashrc 2>/dev/null || echo '. /etc/profile.d/jdk17.sh' >> /root/.bashrc
+ok "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64  ($(java -version 2>&1 | head -1))"
 
+# --------------------------------------------------------------------- repo
 log "repo kuruluyor"
 if ! command -v repo >/dev/null 2>&1; then
   mkdir -p /usr/local/bin
-  curl -fsSL -o /usr/local/bin/repo \
-    https://storage.googleapis.com/git-repo-downloads/repo
+  curl -fsSL -o /usr/local/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
   chmod +x /usr/local/bin/repo
 fi
-ok "repo: $(repo --version 2>/dev/null | head -2 | tail -1)"
+ok "repo hazir"
 
-log "Swap yapilandiriliyor (derleme icin kritik)"
+# -------------------------------------------------------------------- swap
 TOTAL_MB=$(free -m | awk '/^Mem:/{print $2}')
 SWAP_MB=$(free -m | awk '/^Swap:/{print $2}')
-if (( SWAP_MB < 32768 )); then
-  TARGET=$(( TOTAL_MB < 32768 ? 32768 : TOTAL_MB ))
-  log "  mevcut swap: ${SWAP_MB} MB -> ${TARGET} MB ekleniyor"
+TARGET_MB=$(( SWAP_GB * 1024 ))
+if (( SWAP_MB < TARGET_MB )); then
+  log "Swap: ${SWAP_MB} MB -> ${TARGET_MB} MB (VM ici, soong_build 24-26 GB RAM istiyor)"
   if [[ -f /swapfile ]]; then
-    swapon /swapfile 2>/dev/null || true
-  else
-    fallocate -l "${TARGET}M" /swapfile
-    chmod 600 /swapfile
-    mkswap /swapfile >/dev/null
-    swapon /swapfile
-    grep -q '/swapfile' /etc/fstab || echo "/swapfile none swap sw 0 0" >> /etc/fstab
+    swapoff /swapfile 2>/dev/null || true
+    rm -f /swapfile
   fi
+  fallocate -l "${TARGET_MB}M" /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile >/dev/null
+  swapon /swapfile
+  grep -q '/swapfile' /etc/fstab || echo "/swapfile none swap sw 0 0" >> /etc/fstab
 fi
 ok "swap: $(free -g | awk '/^Swap:/{print $2}') GB"
 
-log "Derleme icin ince ayarlar"
-cat > /etc/sysctl.d/99-aosp-build.conf <<'EOF'
-# AOSP derleme icin
-vm.swappiness=10
-vm.vfs.cache_pressure=50
+# ------------------------------------------------------------------ ccache
+# AOSP ccache'i sadece USE_CCACHE=1 + CCACHE_DIR ile kullanir.
+# Temiz derlemede ccache kazanc saglamaz, yalnizca REBUILD'lerde ise yarar.
+CCACHE_DIR="${CCACHE_DIR:-/mnt/shared/ccache}"
+mkdir -p "$CCACHE_DIR"
+ccache -M "${CCACHE_GB}G" >/dev/null 2>&1 || true
+cat > /etc/profile.d/aosp-ccache.sh <<EOF
+export USE_CCACHE=1
+export CCACHE_DIR=$CCACHE_DIR
+export CCACHE_EXEC=$CCACHE_DIR/ccache
+export CCACHE_BASEDIR=/root
 EOF
-sysctl --system >/dev/null 2>&1 || true
-ok "sysctl ayarlandi"
+chmod 644 /etc/profile.d/aosp-ccache.sh
+grep -q "aosp-ccache.sh" /root/.bashrc 2>/dev/null || echo '. /etc/profile.d/aosp-ccache.sh' >> /root/.bashrc
+ok "ccache: USE_CCACHE=1, CCACHE_DIR=$CCACHE_DIR, max ${CCACHE_GB}G"
 
-log "Kullanici yapilandirmasi"
-TARGET_USER="${SUDO_USER:-$(id -un)}"
-if [[ "$TARGET_USER" != "root" ]]; then
-  usermod -aG sudo "$TARGET_USER" 2>/dev/null || true
+# ------------------------------------------------------------------ sysctl
+# Dogrusu vm.vfs_cache_pressure (alt cizgili) - "vm.vfs.cache_pressure" YOKTUR.
+log "sysctl ayarlaniyor"
+cat > /etc/sysctl.d/99-aosp-build.conf <<'EOF'
+# AOSP derleme ayarlari
+vm.swappiness=10
+vm.vfs_cache_pressure=50
+EOF
+if ! sysctl --system 2>&1 | grep -q "vm.vfs.cache_pressure"; then
+  ok "sysctl uygulandi (vm.vfs_cache_pressure)"
+else
+  err "sysctl hatasi - asagidaki dosyayi kontrol et"
+  cat /etc/sysctl.d/99-aosp-build.conf
+  exit 1
 fi
-ok "sudo grubu: $TARGET_USER"
 
 cat <<EOF
 
 ================================================================
-Ortam hazir. Son adimlar (root olmayan kullanici olarak):
+Ortam hazir.
+
+Disk su an: ${AVAIL_GB} GB bos
+
+Derleme adimlari (root olmayan kullanici olarak):
 
   repo init -u https://github.com/Evolution-X/manifest -b bka
   mkdir -p .repo/local_manifests
   cp <device-tree>/build-support/evox-manifest-pinned.xml .repo/local_manifests/
   cp <device-tree>/build-support/local_manifests.xml       .repo/local_manifests/
-  repo sync -c
 
-  bash <device-tree>/scripts/sync_proprietary.sh
+  # ~131 GB (checkout+.git); --depth=1 .git'i kucultur, checkout ayni kalir
+  repo sync -c --depth=1 -j\$(nproc)
+
+  # vendor blob agacini yerlestir (cihazdan uretilmis, git disi)
+  bash <device-tree>/scripts/install_vendor_tree.sh
+
+  # platform patch'leri - base SHA tutmuyorsa HATA VERIR, sessizce atmaz
   bash <device-tree>/scripts/apply_platform_patches.sh
 
   source build/envsetup.sh
   lunch lineage_xuanyuan-bp4a-userdebug
   m evolution -j\$(nproc)
 
-Notlar:
-  - 'm' calisirken GOGC=50 GOMEMLIMIT=8GiB ayarla (dusuk bellekli host)
-  - surum: $(java -version 2>&1 | head -1)
-  - ccache etkin: $(command -v ccache >/dev/null && echo "evet" || echo "yok")
+  # urun adi 'lineage_xuanyuan' (EvoX ağacı böyle kaydediyor),
+  # build hedefi 'evolution' (EvoX'un birlesik target'i) - ikisi de dogru.
+
+  # HIZLI DOGRULAMA (dusuk disk/yakin sure):
+  #   m vendor/xiaomi/xuanyuan   # sadece vendor agaci (~150 GB yeter)
+  #   m nothing                 # sadece build grafigi dogrulama
+
+Ortam: $(java -version 2>&1 | head -1)
+ccache: $CCACHE_DIR (${CCACHE_GB}G)
+swap  : $(free -g | awk '/^Swap:/{print $2}') GB
 ================================================================
 EOF
