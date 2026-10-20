@@ -188,9 +188,18 @@ PRODUCT_PACKAGES += \
     libtinyalsa_xuanyuan_product
 
 # Soong namespaces
+#
+# hardware/xiaomi: Xiaomi'nin kendi HAL agaci (xiaomi-8750/android_hardware_xiaomi).
+# Bu ad Soong'da bir namespace OLUSTURMASI icin PRODUCT_SOONG_NAMESPACES
+# icinde olmali. Cihaz agacinin Android.bp dosyasi bu namespace'i
+# "imports" ile kullaniyor; tanimlanmazsa Soong su hatayi verir:
+#
+#   error: device/xiaomi/xuanyuan/Android.bp:6:1: module "soong_namespace":
+#          namespace hardware/xiaomi does not exist
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH) \
-    hardware/qcom-caf/wlan
+    hardware/qcom-caf/wlan \
+    hardware/xiaomi
 
 # Inherit the proprietary files
 $(call inherit-product, vendor/xiaomi/xuanyuan/xuanyuan-vendor.mk)
