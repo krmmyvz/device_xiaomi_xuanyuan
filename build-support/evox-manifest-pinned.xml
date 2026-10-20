@@ -192,7 +192,21 @@
   <project name="LineageOS/android_packages_providers_ContactsProvider" path="packages/providers/ContactsProvider" revision="5cf46a81b86fdcb69b51ce4ce399b84628019618" upstream="refs/heads/lineage-23.2" dest-branch="refs/heads/lineage-23.2" groups="pdk-cw-fs,pdk-fs"/>
   <project name="LineageOS/android_packages_providers_DownloadProvider" path="packages/providers/DownloadProvider" revision="c9f481f1eadcb77e31949e3d8c26ded66acab65e" upstream="refs/heads/lineage-23.2" dest-branch="refs/heads/lineage-23.2" groups="pdk-cw-fs,pdk-fs"/>
   <project name="LineageOS/android_packages_providers_TelephonyProvider" path="packages/providers/TelephonyProvider" revision="e2a2ea9e708dbfec4e862cb080a393658ce44fae" upstream="refs/heads/lineage-23.2" dest-branch="refs/heads/lineage-23.2" groups="pdk-cw-fs,pdk-fs"/>
-  <project name="LineageOS/android_packages_resources_devicesettings" path="packages/resources/devicesettings" revision="b3556d4d8bb517fd9bd44f53d4cff9078a247829" upstream="refs/heads/lineage-23.2" dest-branch="refs/heads/lineage-23.2"/>
+  <!--
+    AOSPA fork: xiaomi-8750/android_hardware_xiaomi, Xiaomi'nin donanim
+    agacinin AOSPA (Paranoid Android) fork'udur. hardware/xiaomi/dolby
+    modulu "co.aospa.resources" bagimliligini istiyor, ancak LineageOS'un
+    kendi android_packages_resources_devicesettings projesi yalnizca
+    "org.lineageos.settings.resources" modulunu tanimlar:
+
+      error: hardware/xiaomi/dolby/Android.bp:8:1: "XiaomiDolby" depends
+             on undefined module "co.aospa.resources"
+
+    Bu proje AOSPA'nin fork'una yonlendirilir; ayni yolda "co.aospa.resources"
+    modulunu icerir. LineageOS'un modulu yalnizca packages/apps/FlipFlap
+    tarafindan kullaniliyor, o da cihaz urununde PRODUCT_PACKAGES'ta degil.
+  -->
+  <project name="AOSPA/android_packages_resources_devicesettings" path="packages/resources/devicesettings" remote="github-non-los" revision="0355d12547ff7f5bf39c7adc90b06413a1ebfad6" upstream="refs/heads/beryl" dest-branch="refs/heads/beryl"/>
   <project name="LineageOS/android_packages_screensavers_PhotoTable" path="packages/screensavers/PhotoTable" revision="45a995b5cf63ea8bd4b46f53a4e252c48e8cbaac" upstream="refs/heads/lineage-23.2" dest-branch="refs/heads/lineage-23.2" groups="pdk-fs"/>
   <project name="LineageOS/android_packages_services_BuiltInPrintService" path="packages/services/BuiltInPrintService" revision="61e106d17630cd547838bf2110637bbf6d28e78d" upstream="refs/heads/lineage-23.2" dest-branch="refs/heads/lineage-23.2" groups="pdk-cw-fs,pdk-fs"/>
   <project name="LineageOS/android_packages_services_Car" path="packages/services/Car" revision="77cfd1e704b1f969c1634f19176271682227e2ae" upstream="refs/heads/lineage-23.2" dest-branch="refs/heads/lineage-23.2" groups="pdk-cw-fs,pdk-fs"/>

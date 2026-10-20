@@ -18,11 +18,15 @@
 #
 # COZUM
 # -----
-# Kaynak modul kaldirilir. Cihazda bu module ihtiyac yok: proje icinde
-# yalnizca iki "host_supported: true" test tarafinda kullaniliyor
-# (libtensorflowlite_c_api_test, libtensorflowlite_c_test), yani cihaz
-# partition'inda hicbir sey onu bagimlilik olarak istemiyor. Cihazda
-# Xiaomi'nin vendor prebuilt'i kullanilir.
+# Uc blok birlikte kaldirilir:
+#   - cc_library_shared "libtensorflowlite_c"   (cihaz kaynak modulunun
+#     yerini Xiaomi'nin vendor prebuilt'i aliyor)
+#   - cc_test "libtensorflowlite_c_api_test"
+#   - cc_test "libtensorflowlite_c_test"
+#
+# Bu testler host_supported: true, yani yalnizca "m test" gibi ozel
+# hedeflerde calisir; cihaz ROM'unun bir parcasi degildir. Bu yuzden
+# kaldirilmalari cihaz build'ini etkilemez.
 set -uo pipefail
 
 AOSP="${AOSP_ROOT:-/mnt/src}"
@@ -43,22 +47,42 @@ python3 - "$TARGET" <<'PY'
 import re, sys
 p = sys.argv[1]
 s = open(p).read()
-pat = re.compile(
+removed = []
+
+# 1) Kaynak modül: "Standalone shared library" yorumuyla gelen blok.
+pat_mod = re.compile(
     r"\n// Standalone shared library that exports the pure TensorFlow Lite C API\.\n"
     r"cc_library_shared \{\n"
     r"    name: \"libtensorflowlite_c\",.*?\n\}\n",
     re.S)
-m = pat.search(s)
-if not m:
-    raise SystemExit("kaynak modul blogu bulunamadi")
-s = s[:m.start()] + "\n" + s[m.end():]
-open(p, "w").write(s)
-print("[+] kaynak modul kaldirildi")
+m = pat_mod.search(s)
+if m:
+    s = s[:m.start()] + "\n" + s[m.end():]
+    removed.append("cc_library_shared libtensorflowlite_c")
+
+# 2) Iki host testi. Govdeleri blok basindan karsilik gelen "}"a kadar.
+for name in ("libtensorflowlite_c_api_test", "libtensorflowlite_c_test"):
+    m = re.search(r'\ncc_test \{\n    name: "%s",.*?\n\}\n' % re.escape(name), s, re.S)
+    if m:
+        s = s[:m.start()] + "\n" + s[m.end():]
+        removed.append("cc_test " + name)
+
+if removed:
+    open(p, "w").write(s)
+    for r in removed:
+        print("[+] kaldirildi: " + r)
+else:
+    print("[✓] kaldirilacak blok yok")
 PY
 
-if grep -q 'name: "libtensorflowlite_c"' "$TARGET"; then
-  err "kaynak modul hala mevcut"
+# Dogrulama
+if grep -q 'name: "libtensorflowlite_c"' "$TARGET" 2>/dev/null; then
+  err "libtensorflowlite_c hala tanimli"
   exit 1
 fi
-ok "dogrulama: kaynak modul yok"
+if grep -qE 'name: "libtensorflowlite_c(_api_test|_test)"' "$TARGET" 2>/dev/null; then
+  err "host testleri hala tanimli"
+  exit 1
+fi
+ok "dogrulama: kaynak modul ve host testleri yok"
 log "tamamlandi"
