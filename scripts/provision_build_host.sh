@@ -185,12 +185,18 @@ Derleme adimlari (root olmayan kullanici olarak):
   #   - external/tensorflow'daki partition cakismali modul kaldirilir
   #   - cihaz agacindaki yinelenen telephony stub kaldirilir
   #   - FlipFlap'in AOSPA fork'unda olmayan modul referansi kaldirilir
+  #   - vendor namespace'ine sm8750 HAL namespace'i import edilir
+  #   - frozen AIDL arayuzunde uretilmeyen V1 modulu V2'ye cevrilir
+  #   - payload'da bulunmayan vendor kitaphaneleri referanstan cikarilir
   bash <device-tree>/scripts/fix_xiaomi_namespace.sh
   bash <device-tree>/scripts/fix_vendor_namespace.sh
   bash <device-tree>/scripts/fix_vendor_module_conflicts.sh
   bash <device-tree>/scripts/fix_tensorflow_partition.sh
   bash <device-tree>/scripts/fix_duplicate_telephony_stub.sh
   bash <device-tree>/scripts/fix_flipflap_resources.sh
+  bash <device-tree>/scripts/fix_vendor_namespace_imports.sh
+  bash <device-tree>/scripts/fix_frozen_aidl_version.sh
+  bash <device-tree>/scripts/fix_missing_vendor_libs.sh
 
   # Checkout bozulmussa (NAS baglantisi kesintisi) onar:
   #   bash <device-tree>/scripts/find_broken_projects.sh
