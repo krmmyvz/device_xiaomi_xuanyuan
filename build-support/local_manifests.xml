@@ -77,11 +77,21 @@
            remote="github-non-los"
            revision="refs/heads/main"/>
 
-  <!-- Xiaomi proprietary vendor blob'lari -->
-  <project name="xiaomi-8750/proprietary_vendor_xiaomi_xuanyuan"
-           path="vendor/xiaomi/xuanyuan"
-           remote="github-non-los"
-           revision="refs/heads/beryl"/>
+  <!--
+    Xiaomi proprietary vendor blob'lari: xiaomi-8750/proprietary_vendor_xuanyuan
+    (beryl) KALDIRILDI.
+
+    Neden: o agac A15 kokenli ve eksik. Kendi AIDL mirror kutuphaneleri
+    (composer3-V2/V3, offlinecamera-V2, camera.device-V2, camera.metadata-V2)
+    hic yok; halbuki sm8750 CAF'in cc_defaults'i ve vendor'in kendi
+    Android.bp'si onlari gerektiriyor -> "depends on undefined module".
+    Ayrica kendi icinde tutarsiz: composer-service binary'si composer3 V3
+    istiyor, Android.bp ise V4 yaziyor.
+
+    Yerine: cihazdan uretilen OS4.0.0.6 vendor agaci kurulur
+    (scripts/install_vendor_tree.sh, from degeriyle artifact). Dizin manifest'te
+    olmadigi icin repo sync onu yazmaz; icerik artifact yonetimindedir.
+  -->
 
   <!--
     device/xiaomi/xuanyuan-kernel KALDIRILDI.
