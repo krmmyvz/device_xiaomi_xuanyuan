@@ -110,16 +110,26 @@ fi
 if (( DO_PRIVATE )); then
   log "Proprietary payload kopyalaniyor"
   if [[ ! -d "$PRIV" ]]; then
-    err "Private payload deposu yok: $PRIV"
-    dim  "Clone et:"
-    dim  "  git clone https://github.com/krmmyvz/proprietary_vendor_xiaomi_xuanyuan \\"
-    dim  "      $PRIV"
-    dim  "  cd $PRIV && git lfs pull      # <-- APK'lar LFS pointer olarak gelir!"
-    exit 1
+    # Private depo checkout edilmemisse payload device tree'de zaten yerinde
+    # mi diye bak. Yerindeyse kopyalama adimini atla.
+    if [[ -d "$TREE/prebuilts/miuicamera" ]]; then
+      ok "Private payload deposu yok ama payload device tree'de zaten yerinde"
+      dim "  $TREE/prebuilts/miuicamera"
+      PRIV=""
+    else
+      err "Private payload deposu yok: $PRIV"
+      dim  "Clone et:"
+      dim  "  git clone https://github.com/krmmyvz/proprietary_vendor_xiaomi_xuanyuan \\"
+      dim  "      $PRIV"
+      dim  "  cd $PRIV && git lfs pull      # <-- APK'lar LFS pointer olarak gelir!"
+      exit 1
+    fi
   fi
 
   # LFS pointer kontrolu: 131 baytlik stub dosyalar gercek APK degildir.
   # Bu kontrol olmadan build bozuk APK paketler (sessiz hata).
+  # PRIV="" ise payload zaten device tree'de; kopyalama adimi atlanir.
+  if [[ -n "$PRIV" ]]; then
   stub=$(find "$PRIV" -name "*.apk" -size -1k 2>/dev/null | head -1)
   if [[ -n "$stub" ]]; then
     err "LFS icerigi eksik - '$stub' bir LFS pointer (stub), gercek dosya degil"
@@ -157,6 +167,7 @@ if (( DO_PRIVATE )); then
     cp -R "$PRIV/camera-graphs" "$TREE/configs/camera"
     ok "camera-graphs -> $TREE/configs/camera"
   fi
+  fi   # PRIV bos degilse
 fi
 
 # ------------------------------------------------------------------ 3) dogrulama
