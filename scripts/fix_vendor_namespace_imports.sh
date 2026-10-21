@@ -16,20 +16,30 @@
 #   Module "vendor.qti.hardware.agm-V1-ndk" can be found in these
 #   namespaces: ["hardware/qcom-caf/sm8450-6.6" "hardware/qcom-caf/sm8750"]
 #
-# Ayni sekilde display arayuzleri de gorunmez:
+# Ayni sekilde display ve WLAN arayuzleri de gorunmez:
 #
 #   error: "ppd" depends on undefined module
 #          "vendor.qti.hardware.display.color-V1-ndk".
 #   Module "vendor.qti.hardware.display.color-V1-ndk" can be found in
 #   these namespaces: ["vendor/qcom/opensource/commonsys-intf/display"]
 #
+#   error: "lowi-server" depends on undefined module "libcld80211".
+#   Module "libcld80211" can be found in these namespaces:
+#   ["hardware/qcom-caf/wlan" "hardware/qcom/wlan/legacy" ...]
+#
+#   error: "qti" depends on undefined module "librmnetctl".
+#   Module "librmnetctl" can be found in these namespaces:
+#   ["vendor/qcom/opensource/dataservices"]
+#
 # COZUM
 # -----
-# soong_namespace imports listesine iki namespace eklenir:
+# soong_namespace imports listesine gereken namespace'ler eklenir:
 #   - hardware/qcom-caf/sm8750 : sm8750 SoC'sunun HAL'lari (agm, qspmhal,
 #     adreno profiller gibi blob'larin cogu buradan gelir)
 #   - vendor/qcom/opensource/commonsys-intf/display : Qualcomm display
 #     arayuzleri (color, postproc)
+#   - hardware/qcom-caf/wlan : Qualcomm WLAN/CLD80211 kutuphaneleri
+#   - vendor/qcom/opensource/dataservices : rmnet data servisi
 #
 # Idempotenttir.
 set -uo pipefail
@@ -40,6 +50,8 @@ TARGET="$AOSP/vendor/xiaomi/xuanyuan/Android.bp"
 IMPORTS=(
   "hardware/qcom-caf/sm8750"
   "vendor/qcom/opensource/commonsys-intf/display"
+  "hardware/qcom-caf/wlan"
+  "vendor/qcom/opensource/dataservices"
 )
 
 log() { printf '[+] %s\n' "$*"; }
