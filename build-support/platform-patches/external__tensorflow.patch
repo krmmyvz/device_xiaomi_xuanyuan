@@ -1,44 +1,30 @@
 diff --git a/tensorflow/lite/Android.bp b/tensorflow/lite/Android.bp
-index aa06e078..1dd83f5e 100644
+index aa06e078550..092861b9b05 100644
 --- a/tensorflow/lite/Android.bp
 +++ b/tensorflow/lite/Android.bp
-@@ -141,15 +141,6 @@ cc_library_shared {
+@@ -146,6 +146,25 @@ cc_library_shared {
+     name: "libtensorflowlite_c",
+     defaults: ["tflite_defaults"],
+     whole_static_libs: ["libtflite_static"],
++    vendor_available: true,
++    target: {
++        android_arm64: {
++            srcs: [
++                "delegates/xnnpack/quantization_util.cc",
++                "delegates/xnnpack/xnnpack_delegate.cc",
++            ],
++            header_libs: [
++                "fp16_headers",
++                "gemmlowp_headers",
++                "libeigen",
++            ],
++            whole_static_libs: ["libXNNPACK"],
++            cflags: [
++                "-DXNNPACK_DELEGATE_ENABLE_QS8=1",
++                "-DXNNPACK_DELEGATE_ENABLE_QU8=1",
++            ],
++        },
++    },
      stl: "libc++_static",
- }
- 
--// Standalone shared library that exports the pure TensorFlow Lite C API.
--cc_library_shared {
--    name: "libtensorflowlite_c",
--    defaults: ["tflite_defaults"],
--    whole_static_libs: ["libtflite_static"],
--    stl: "libc++_static",
--    version_script: "c/version_script.lds",
--    export_header_lib_headers: ["tensorflow_headers"],
--}
- 
- // Repackaging of test data paths so the hardcoded test paths work.
- genrule {
-@@ -171,23 +162,8 @@ genrule {
- }
- 
- // Basic gtest ensuring the C API links and runs correctly.
--cc_test {
--    name: "libtensorflowlite_c_api_test",
--    host_supported: true,
--    srcs: ["c/c_api_signature_runner_test.cc"],
--    data: [":tflite_testdata"],
--    shared_libs: ["libtensorflowlite_c"],
--}
- 
- // Basic (non-gtest) test ensuring the pure C API links and runs correctly.
--cc_test {
--    name: "libtensorflowlite_c_test",
--    host_supported: true,
--    gtest: false,
--    srcs: ["c/c_test.c"],
--    data: [":tflite_testdata"],
--    shared_libs: ["libtensorflowlite_c"],
--}
- 
- cc_library_shared {
-     name: "libtensorflowlite_jni",
+     version_script: "c/version_script.lds",
+     export_header_lib_headers: ["tensorflow_headers"],
