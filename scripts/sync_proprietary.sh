@@ -11,9 +11,27 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/env.sh"
 
 ROMBASE="${ROM:-${PROJECT_ROOT}/rom}"
-PRIV="$ROMBASE/proprietary_vendor_xiaomi_xuanyuan"
-DEV="$ROMBASE/device_xiaomi_xuanyuan"
 CLEAN=0
+
+# Iki yerlesim desteklenir:
+#   a) repo yonetilen AOSP agaci  : $AOSP_ROOT/device/xiaomi/xuanyuan
+#      (manifestteki yol; build sirasinda bu kullanilir)
+#   b) side-by-side gelistirme    : $PROJECT_ROOT/rom/device_xiaomi_xuanyuan
+# Bu yuzden once repo yonetilen agaci, sonra side-by-side'i dene.
+_pick_dev() {
+  for c in "${AOSP_ROOT:-}/device/xiaomi/xuanyuan" "$ROMBASE/device_xiaomi_xuanyuan"; do
+    [[ -n "$c" && -d "$c" ]] && { echo "$c"; return; }
+  done
+}
+_pick_priv() {
+  for c in "${AOSP_ROOT:-}/proprietary_vendor_xiaomi_xuanyuan" "$ROMBASE/proprietary_vendor_xiaomi_xuanyuan"; do
+    [[ -n "$c" && -d "$c" ]] && { echo "$c"; return; }
+  done
+  echo "$ROMBASE/proprietary_vendor_xiaomi_xuanyuan"
+}
+
+DEV="$(_pick_dev)"
+PRIV="$(_pick_priv)"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -26,8 +44,18 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-[[ -d "$PRIV" ]] || die "Private repo yok: $PRIV"
-[[ -d "$DEV" ]]  || die "Device tree yok: $DEV"
+[[ -d "$DEV" ]] || die "Device tree yok: $DEV"
+
+if [[ ! -d "$PRIV" ]]; then
+  # Private repo checkout edilmemisse: payload device tree'de zaten yerinde
+  # mi diye bak. Yerindeyse bir sey yapmaya gerek yok.
+  if [[ -d "$DEV/prebuilts/miuicamera" ]]; then
+    ok "Private repo yok ama payload device tree'de zaten yerinde"
+    dim "  $DEV/prebuilts/miuicamera"
+    exit 0
+  fi
+  die "Private repo yok: $PRIV"
+fi
 
 # LFS pointer kontrolu: private repo git-lfs kullanir. 'git lfs pull'
 # calistirilmamissa APK'lar 131 baytlik stub olarak kalir ve build
