@@ -1,0 +1,739 @@
+diff --git a/res/values-ja/cm_strings.xml b/res/values-ja/cm_strings.xml
+index 77a98f729ea..e692a3ca151 100644
+--- a/res/values-ja/cm_strings.xml
++++ b/res/values-ja/cm_strings.xml
+@@ -102,4 +102,8 @@
+     <string name="battery_design_capacity_summary">%1$d mAh</string>
+     <string name="battery_maximum_capacity">最大容量</string>
+     <string name="battery_maximum_capacity_summary">%1$d mAh (%2$d%%)</string>
++    <string name="refresh_rate_mode_title">リフレッシュレートモード</string>
++    <string name="refresh_rate_mode_auto">自動（最大120 Hz）</string>
++    <string name="refresh_rate_mode_60">60 Hz固定</string>
++    <string name="refresh_rate_mode_120">120 Hz固定</string>
+ </resources>
+diff --git a/res/values/cm_strings.xml b/res/values/cm_strings.xml
+index af4cb57b28e..87bd2ae9936 100644
+--- a/res/values/cm_strings.xml
++++ b/res/values/cm_strings.xml
+@@ -186,4 +186,8 @@
+ 
+     <!-- eSIM settings -->
+     <string name="esim_settings_title">eSIM settings</string>
++    <string name="refresh_rate_mode_title">Refresh rate mode</string>
++    <string name="refresh_rate_mode_auto">Automatic (up to 120 Hz)</string>
++    <string name="refresh_rate_mode_60">60 Hz fixed</string>
++    <string name="refresh_rate_mode_120">120 Hz fixed</string>
+ </resources>
+diff --git a/res/xml/display_settings.xml b/res/xml/display_settings.xml
+index 27fec23338e..be6d64a89bb 100644
+--- a/res/xml/display_settings.xml
++++ b/res/xml/display_settings.xml
+@@ -238,7 +238,7 @@
+ 
+         <!--<ListPreference
+             android:key="max_refresh_rate"
+-            android:title="@string/max_refresh_rate_title"
++            android:title="@string/refresh_rate_mode_title"
+             android:summary="@string/summary_placeholder"
+             settings:controller="com.android.settings.display.PeakRefreshRateListPreferenceController" />
+ 
+diff --git a/src/com/android/settings/display/PeakRefreshRateListPreferenceController.java b/src/com/android/settings/display/PeakRefreshRateListPreferenceController.java
+index 9acf6c1125f..b545d2d6356 100644
+--- a/src/com/android/settings/display/PeakRefreshRateListPreferenceController.java
++++ b/src/com/android/settings/display/PeakRefreshRateListPreferenceController.java
+@@ -1,6 +1,6 @@
+ /*
+  * Copyright (C) 2020 The Android Open Source Project
+- * Copyright (C) 2021 The LineageOS Project
++ * Copyright (C) 2021-2026 The LineageOS Project
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+@@ -18,11 +18,7 @@
+ package com.android.settings.display;
+ 
+ import android.content.Context;
+-import android.hardware.display.DisplayManager;
+-import android.os.Handler;
+-import android.provider.DeviceConfig;
+ import android.provider.Settings;
+-import android.util.Log;
+ import android.view.Display;
+ 
+ import androidx.preference.ListPreference;
+@@ -31,177 +27,95 @@ import androidx.preference.PreferenceScreen;
+ 
+ import com.android.settings.R;
+ import com.android.settings.core.BasePreferenceController;
+-import com.android.settingslib.core.lifecycle.LifecycleObserver;
+-import com.android.settingslib.core.lifecycle.events.OnStart;
+-import com.android.settingslib.core.lifecycle.events.OnStop;
+-
+-import java.util.ArrayList;
+-import java.util.Arrays;
+-import java.util.concurrent.Executor;
+-import java.util.List;
+-import java.util.Locale;
+ 
+ public class PeakRefreshRateListPreferenceController extends BasePreferenceController
+-        implements LifecycleObserver, OnStart, OnStop, Preference.OnPreferenceChangeListener {
++        implements Preference.OnPreferenceChangeListener {
+ 
+-    private static float DEFAULT_REFRESH_RATE = 60f;
++    static final String MODE_AUTO = "auto";
++    static final String MODE_60 = "60";
++    static final String MODE_120 = "120";
+ 
+-    private static final String TAG = "PeakRefreshRatePrefCtr";
+-    private static final float INVALIDATE_REFRESH_RATE = -1f;
++    private static final float RATE_60 = 60f;
++    private static final float RATE_120 = 120f;
+ 
+-    private final Handler mHandler;
+-    private final IDeviceConfigChange mOnDeviceConfigChange;
+-    private final DeviceConfigDisplaySettings mDeviceConfigDisplaySettings;
+     private ListPreference mListPreference;
+ 
+-    private List<String> mEntries = new ArrayList<>();
+-    private List<String> mValues = new ArrayList<>();
+-
+-    private interface IDeviceConfigChange {
+-        void onDefaultRefreshRateChanged();
+-    }
+-
+     public PeakRefreshRateListPreferenceController(Context context, String key) {
+         super(context, key);
+-        mHandler = new Handler(context.getMainLooper());
+-        mDeviceConfigDisplaySettings = new DeviceConfigDisplaySettings();
+-        mOnDeviceConfigChange =
+-                new IDeviceConfigChange() {
+-                    public void onDefaultRefreshRateChanged() {
+-                        updateState(mListPreference);
+-                    }
+-                };
+-
+-        final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
+-        final Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
++    }
+ 
+-        if (display == null) {
+-            Log.w(TAG, "No valid default display device");
+-        } else {
+-            Display.Mode mode = display.getMode();
+-            Display.Mode[] modes = display.getSupportedModes();
+-            Arrays.sort(modes, (mode1, mode2) ->
+-                Float.compare(mode2.getRefreshRate(), mode1.getRefreshRate()));
+-            for (Display.Mode m : modes) {
+-                if (m.getPhysicalWidth() == mode.getPhysicalWidth() &&
+-                        m.getPhysicalHeight() == mode.getPhysicalHeight()) {
+-                    mEntries.add(String.format("%.02fHz", m.getRefreshRate())
+-                            .replaceAll("[\\.,]00", ""));
+-                    mValues.add(mValues.isEmpty()
+-                            ? "Infinity"
+-                            : String.format(Locale.US, "%.02f", m.getRefreshRate()));
+-                }
++    @Override
++    public int getAvailabilityStatus() {
++        final Display display = mContext.getDisplay();
++        if (display == null) return UNSUPPORTED_ON_DEVICE;
++        final Display.Mode activeMode = display.getMode();
++        for (Display.Mode mode : display.getSupportedModes()) {
++            if (mode.getPhysicalWidth() == activeMode.getPhysicalWidth()
++                    && mode.getPhysicalHeight() == activeMode.getPhysicalHeight()
++                    && mode.getRefreshRate() >= 119f) {
++                return AVAILABLE;
+             }
+         }
++        return UNSUPPORTED_ON_DEVICE;
+     }
+ 
+     @Override
+     public void displayPreference(PreferenceScreen screen) {
+         super.displayPreference(screen);
+-
+         mListPreference = screen.findPreference(getPreferenceKey());
+-        mListPreference.setEntries(mEntries.toArray(new String[mEntries.size()]));
+-        mListPreference.setEntryValues(mValues.toArray(new String[mValues.size()]));
+-    }
+-
+-    @Override
+-    public int getAvailabilityStatus() {
+-        if (mContext.getResources().getBoolean(R.bool.config_show_peak_refresh_rate_switch)) {
+-            return AVAILABLE;
+-        } else {
+-            return UNSUPPORTED_ON_DEVICE;
+-        }
++        if (mListPreference == null) return;
++        mListPreference.setEntries(new CharSequence[] {
++                mContext.getText(R.string.refresh_rate_mode_auto),
++                mContext.getText(R.string.refresh_rate_mode_60),
++                mContext.getText(R.string.refresh_rate_mode_120)
++        });
++        mListPreference.setEntryValues(new CharSequence[] {MODE_AUTO, MODE_60, MODE_120});
+     }
+ 
+     @Override
+     public void updateState(Preference preference) {
+-        final float currentValue = Settings.System.getFloat(mContext.getContentResolver(),
+-                Settings.System.PEAK_REFRESH_RATE, getDefaultPeakRefreshRate());
+-        int index = mListPreference.findIndexOfValue(
+-                String.format(Locale.US, "%.02f", currentValue));
+-        if (index < 0) index = 0;
+-        mListPreference.setValueIndex(index);
+-        mListPreference.setSummary(mListPreference.getEntries()[index]);
++        if (!(preference instanceof ListPreference)) return;
++        final ListPreference list = (ListPreference) preference;
++        final float min = Settings.System.getFloat(mContext.getContentResolver(),
++                Settings.System.MIN_REFRESH_RATE, RATE_60);
++        final float peak = Settings.System.getFloat(mContext.getContentResolver(),
++                Settings.System.PEAK_REFRESH_RATE, RATE_120);
++        final String mode = getModeForRates(min, peak);
++        list.setValue(mode);
++        final int index = list.findIndexOfValue(mode);
++        if (index >= 0 && list.getEntries() != null) {
++            list.setSummary(list.getEntries()[index]);
++        }
+     }
+ 
+     @Override
+     public boolean onPreferenceChange(Preference preference, Object newValue) {
+-        Settings.System.putFloat(mContext.getContentResolver(), Settings.System.PEAK_REFRESH_RATE,
+-                Float.valueOf((String) newValue));
++        final float[] rates = getRatesForMode(String.valueOf(newValue));
++        if (rates == null) return false;
++        Settings.System.putFloat(mContext.getContentResolver(),
++                Settings.System.MIN_REFRESH_RATE, rates[0]);
++        Settings.System.putFloat(mContext.getContentResolver(),
++                Settings.System.PEAK_REFRESH_RATE, rates[1]);
+         updateState(preference);
+         return true;
+     }
+ 
+-    @Override
+-    public void onStart() {
+-        mDeviceConfigDisplaySettings.startListening();
+-    }
+-
+-    @Override
+-    public void onStop() {
+-        mDeviceConfigDisplaySettings.stopListening();
+-    }
+-
+-    private float findPeakRefreshRate(Display.Mode[] modes) {
+-        float peakRefreshRate = DEFAULT_REFRESH_RATE;
+-        for (Display.Mode mode : modes) {
+-            if (Math.round(mode.getRefreshRate()) > DEFAULT_REFRESH_RATE) {
+-                peakRefreshRate = mode.getRefreshRate();
+-            }
++    static float[] getRatesForMode(String mode) {
++        switch (mode) {
++            case MODE_AUTO:
++                return new float[] {RATE_60, RATE_120};
++            case MODE_60:
++                return new float[] {RATE_60, RATE_60};
++            case MODE_120:
++                return new float[] {RATE_120, RATE_120};
++            default:
++                return null;
+         }
+-        return peakRefreshRate;
+     }
+ 
+-    private class DeviceConfigDisplaySettings
+-            implements DeviceConfig.OnPropertiesChangedListener, Executor {
+-        public void startListening() {
+-            DeviceConfig.addOnPropertiesChangedListener(
+-                    DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+-                    this /* Executor */,
+-                    this /* Listener */);
+-        }
+-
+-        public void stopListening() {
+-            DeviceConfig.removeOnPropertiesChangedListener(this);
+-        }
+-
+-        public float getDefaultPeakRefreshRate() {
+-            float defaultPeakRefreshRate =
+-                    DeviceConfig.getFloat(
+-                            DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
+-                            DisplayManager.DeviceConfig.KEY_PEAK_REFRESH_RATE_DEFAULT,
+-                            INVALIDATE_REFRESH_RATE);
+-            Log.d(TAG, "DeviceConfig getDefaultPeakRefreshRate : " + defaultPeakRefreshRate);
+-
+-            return defaultPeakRefreshRate;
+-        }
+-
+-        @Override
+-        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+-            // Got notified if any property has been changed in NAMESPACE_DISPLAY_MANAGER. The
+-            // KEY_PEAK_REFRESH_RATE_DEFAULT value could be added, changed, removed or unchanged.
+-            // Just force a UI update for any case.
+-            if (mOnDeviceConfigChange != null) {
+-                mOnDeviceConfigChange.onDefaultRefreshRateChanged();
+-                updateState(mListPreference);
+-            }
+-        }
+-
+-        @Override
+-        public void execute(Runnable runnable) {
+-            if (mHandler != null) {
+-                mHandler.post(runnable);
+-            }
+-        }
+-    }
+-
+-    private float getDefaultPeakRefreshRate() {
+-        float defaultPeakRefreshRate = mDeviceConfigDisplaySettings.getDefaultPeakRefreshRate();
+-        if (defaultPeakRefreshRate == INVALIDATE_REFRESH_RATE) {
+-            defaultPeakRefreshRate = (float) mContext.getResources().getInteger(
+-                    com.android.internal.R.integer.config_defaultPeakRefreshRate);
+-        }
+-
+-        return defaultPeakRefreshRate;
++    static String getModeForRates(float min, float peak) {
++        if (min >= 119f && peak >= 119f) return MODE_120;
++        if (peak <= 61f) return MODE_60;
++        return MODE_AUTO;
+     }
+ }
+diff --git a/src/com/android/settings/network/telephony/NetworkOperatorPreference.kt b/src/com/android/settings/network/telephony/NetworkOperatorPreference.kt
+index 7f42400fe85..3347043a68a 100644
+--- a/src/com/android/settings/network/telephony/NetworkOperatorPreference.kt
++++ b/src/com/android/settings/network/telephony/NetworkOperatorPreference.kt
+@@ -53,6 +53,7 @@ open class NetworkOperatorPreference(
+ ) : Preference(context) {
+     private var cellInfo: CellInfo? = null
+     private var cellId: CellIdentity? = null
++    private var operatorInfo: OperatorInfo? = null
+     private val useNewApi = context.resources.getBoolean(
+         com.android.internal.R.bool.config_enableNewAutoSelectNetworkUI
+     )
+@@ -64,24 +65,33 @@ open class NetworkOperatorPreference(
+     fun updateCell(cellInfo: CellInfo?, cellId: CellIdentity? = cellInfo?.cellIdentity) {
+         this.cellInfo = cellInfo
+         this.cellId = cellId
++        this.operatorInfo = null
+         refresh()
+     }
+ 
+     /**
+      * Compare cell within preference
+      */
++    fun updateOperator(operatorInfo: OperatorInfo) {
++        this.operatorInfo = operatorInfo
++        this.cellInfo = null
++        this.cellId = null
++        refresh()
++    }
++
+     fun isSameCell(cellInfo: CellInfo): Boolean = cellInfo.cellIdentity == cellId
+ 
+     /**
+      * Return true when this preference is for forbidden network
+      */
+-    fun isForbiddenNetwork(): Boolean = cellId?.getOperatorNumeric() in forbiddenPlmns
++    fun isForbiddenNetwork(): Boolean =
++        (operatorInfo?.operatorNumeric ?: cellId?.getOperatorNumeric()) in forbiddenPlmns
+ 
+     /**
+      * Refresh the NetworkOperatorPreference by updating the title and the icon.
+      */
+     fun refresh() {
+-        var networkTitle = cellId?.getNetworkTitle() ?: return
++        var networkTitle = operatorInfo?.operatorAlphaLong ?: cellId?.getNetworkTitle() ?: return
+         if (isForbiddenNetwork()) {
+             if (DBG) Log.d(TAG, "refresh forbidden network: $networkTitle")
+             networkTitle += " ${context.getString(R.string.forbidden_network)}"
+@@ -114,12 +124,12 @@ open class NetworkOperatorPreference(
+     /**
+      * Operator name of this cell
+      */
+-    fun getOperatorName(): String? = cellId?.getNetworkTitle()
++    fun getOperatorName(): String? = operatorInfo?.operatorAlphaLong ?: cellId?.getNetworkTitle()
+ 
+     /**
+      * Operator info of this cell
+      */
+-    fun getOperatorInfo() = OperatorInfo(
++    fun getOperatorInfo() = operatorInfo ?: OperatorInfo(
+         Objects.toString(cellId?.operatorAlphaLong, ""),
+         Objects.toString(cellId?.operatorAlphaShort, ""),
+         cellId?.getOperatorNumeric(),
+diff --git a/src/com/android/settings/network/telephony/NetworkSelectSettings.java b/src/com/android/settings/network/telephony/NetworkSelectSettings.java
+index 2cbed4f7b5a..207c6b76a5e 100644
+--- a/src/com/android/settings/network/telephony/NetworkSelectSettings.java
++++ b/src/com/android/settings/network/telephony/NetworkSelectSettings.java
+@@ -97,6 +97,7 @@ public class NetworkSelectSettings extends DashboardFragment {
+     private CarrierConfigManager.CarrierConfigChangeListener mCarrierConfigChangeListener;
+     private AtomicBoolean mShouldFilterOutSatellitePlmn = new AtomicBoolean();
+ 
++    private List<OperatorInfo> mLegacyOperators;
+     private NetworkScanRepository mNetworkScanRepository;
+     @Nullable
+     private Job mNetworkScanJob = null;
+@@ -362,19 +363,58 @@ public class NetworkSelectSettings extends DashboardFragment {
+ 
+     @VisibleForTesting
+     protected void scanResultHandler(NetworkScanRepository.NetworkScanResult results) {
++        NetworkScanRepository.NetworkScanState state = results.getState();
++        if (results.getOperators() != null) {
++            mLegacyOperators = filterLegacyOperators(results.getOperators());
++            mPreferenceCategory.removeAll();
++            updateLegacyOperatorPreferences(mLegacyOperators);
++            if (mLegacyOperators.isEmpty()) {
++                addMessagePreference(R.string.empty_networks_list);
++            }
++            setProgressBarVisible(state == NetworkScanRepository.NetworkScanState.ACTIVE);
++            return;
++        }
++
++        mLegacyOperators = null;
+         mCellInfoList = filterOutSatellitePlmn(results.getCellInfos());
+         Log.d(TAG, "CellInfoList: " + CellInfoUtil.cellInfoListToString(mCellInfoList));
+         updateAllPreferenceCategory();
+-        NetworkScanRepository.NetworkScanState state = results.getState();
+         if (state == NetworkScanRepository.NetworkScanState.ERROR) {
+             addMessagePreference(R.string.network_query_error);
+         } else if (mCellInfoList.isEmpty()) {
+             addMessagePreference(R.string.empty_networks_list);
+         }
+-        // keep showing progress bar, it will be stopped when error or completed
+         setProgressBarVisible(state == NetworkScanRepository.NetworkScanState.ACTIVE);
+     }
+ 
++    private List<OperatorInfo> filterLegacyOperators(List<OperatorInfo> operators) {
++        List<String> satellitePlmns = getSatellitePlmnsForCarrierWrapper();
++        if (!mShouldFilterOutSatellitePlmn.get() || satellitePlmns.isEmpty()) {
++            return operators;
++        }
++        return operators.stream()
++                .filter(operator -> !satellitePlmns.contains(operator.getOperatorNumeric()))
++                .collect(Collectors.toList());
++    }
++
++    private void updateLegacyOperatorPreferences(List<OperatorInfo> operators) {
++        updateForbiddenPlmns();
++        for (int index = 0; index < operators.size(); index++) {
++            OperatorInfo operator = operators.get(index);
++            NetworkOperatorPreference pref = new NetworkOperatorPreference(
++                    getPrefContext(), mForbiddenPlmns, mShow4GForLTE);
++            pref.updateOperator(operator);
++            pref.setOrder(index);
++            pref.setKey(operator.getOperatorNumeric() != null
++                    ? operator.getOperatorNumeric() + "_" + operator.getRan()
++                    : "legacy_operator_" + index);
++            if (operator.getState() == OperatorInfo.State.CURRENT) {
++                pref.setSummary(R.string.network_connected);
++            }
++            mPreferenceCategory.addPreference(pref);
++        }
++    }
++
+     @Keep
+     @VisibleForTesting
+     protected NetworkOperatorPreference createNetworkOperatorPreference(CellInfo cellInfo) {
+@@ -445,6 +485,14 @@ public class NetworkSelectSettings extends DashboardFragment {
+      */
+     private void forceUpdateConnectedPreferenceCategory(
+             NetworkSelectRepository.NetworkRegistrationAndForbiddenInfo info) {
++        if (mLegacyOperators != null) {
++            mPreferenceCategory.removeAll();
++            updateLegacyOperatorPreferences(mLegacyOperators);
++            if (mLegacyOperators.isEmpty()) {
++                addMessagePreference(R.string.empty_networks_list);
++            }
++            return;
++        }
+         mPreferenceCategory.removeAll();
+         for (NetworkRegistrationInfo regInfo : info.getNetworkList()) {
+             final CellIdentity cellIdentity = regInfo.getCellIdentity();
+diff --git a/src/com/android/settings/network/telephony/scan/NetworkScanRepository.kt b/src/com/android/settings/network/telephony/scan/NetworkScanRepository.kt
+index caf8549d53d..d1d938f9744 100644
+--- a/src/com/android/settings/network/telephony/scan/NetworkScanRepository.kt
++++ b/src/com/android/settings/network/telephony/scan/NetworkScanRepository.kt
+@@ -19,6 +19,7 @@ package com.android.settings.network.telephony.scan
+ import android.content.Context
+ import android.telephony.AccessNetworkConstants.AccessNetworkType
+ import android.telephony.CellInfo
++import android.telephony.NetworkScan
+ import android.telephony.NetworkScanRequest
+ import android.telephony.PhoneCapability
+ import android.telephony.RadioAccessSpecifier
+@@ -26,6 +27,8 @@ import android.telephony.TelephonyManager
+ import android.telephony.TelephonyScanManager
+ import android.util.Log
+ import androidx.lifecycle.LifecycleOwner
++import com.android.internal.telephony.CellNetworkScanResult
++import com.android.internal.telephony.OperatorInfo
+ import com.android.settings.R
+ import com.android.settings.network.telephony.CellInfoUtil.getNetworkTitle
+ import com.android.settings.network.telephony.telephonyManager
+@@ -44,9 +47,10 @@ class NetworkScanRepository(private val context: Context, subId: Int) {
+         ACTIVE, COMPLETE, ERROR
+     }
+ 
+-    data class NetworkScanResult(
++    data class NetworkScanResult @JvmOverloads constructor(
+         val state: NetworkScanState,
+         val cellInfos: List<CellInfo>,
++        val operators: List<OperatorInfo>? = null,
+     )
+ 
+     private val telephonyManager = context.telephonyManager(subId)
+@@ -70,6 +74,24 @@ class NetworkScanRepository(private val context: Context, subId: Int) {
+     fun networkScanFlow(): Flow<NetworkScanResult> = callbackFlow {
+         var state = NetworkScanState.ACTIVE
+         var cellInfos: List<CellInfo> = emptyList()
++        var operators: List<OperatorInfo>? = null
++        val scanExecutor = Executors.newSingleThreadExecutor()
++        val scanLock = Any()
++        var activeScan: NetworkScan? = null
++        var closed = false
++        var retriedLteOnly = false
++
++        fun registerScan(scan: NetworkScan?, initial: Boolean) {
++            val shouldStop = synchronized(scanLock) {
++                if (closed || (initial && activeScan != null)) {
++                    true
++                } else {
++                    activeScan = scan
++                    false
++                }
++            }
++            if (shouldStop) scan?.stopScan()
++        }
+ 
+         val callback = object : TelephonyScanManager.NetworkScanCallback() {
+             override fun onResults(results: List<CellInfo>) {
+@@ -84,33 +106,82 @@ class NetworkScanRepository(private val context: Context, subId: Int) {
+             }
+ 
+             override fun onError(error: Int) {
+-                state = NetworkScanState.ERROR
++                // Some modems reject a scan spanning several radio technologies, but accept
++                // an unrestricted LTE scan and return the available operator list.
++                if (error == NetworkScan.ERROR_INVALID_SCAN && !retriedLteOnly &&
++                    AccessNetworkType.EUTRAN in getAllowedNetworkTypes()
++                ) {
++                    retriedLteOnly = true
++                    val retryScan = try {
++                        telephonyManager.requestNetworkScan(
++                            createNetworkScan(
++                                listOf(AccessNetworkType.EUTRAN),
++                                LTE_ONLY_MAX_SEARCH_TIME_SEC,
++                            ),
++                            scanExecutor,
++                            this,
++                        )
++                    } catch (exception: Exception) {
++                        Log.w(TAG, "LTE-only network scan could not start", exception)
++                        null
++                    }
++                    if (retryScan != null) {
++                        registerScan(retryScan, initial = false)
++                        return
++                    }
++                }
++
++                // Fall back to the legacy query if both scan requests fail.
++                val legacyResult = try {
++                    telephonyManager.getAvailableNetworks()
++                } catch (exception: Exception) {
++                    Log.w(TAG, "Legacy network query failed", exception)
++                    null
++                }
++                if (legacyResult?.status == CellNetworkScanResult.STATUS_SUCCESS) {
++                    operators = legacyResult.operators.orEmpty()
++                    state = NetworkScanState.COMPLETE
++                    Log.i(TAG, "Using legacy RIL network scan after scan error=$error")
++                } else {
++                    state = NetworkScanState.ERROR
++                    Log.w(TAG, "Legacy RIL network query did not return operators")
++                }
+                 sendResult()
+                 close()
+             }
+ 
+             private fun sendResult() {
+-                trySend(NetworkScanResult(state, cellInfos))
++                trySend(NetworkScanResult(state, cellInfos, operators))
+             }
+         }
+ 
+-        val networkScan = telephonyManager.requestNetworkScan(
+-            createNetworkScan(),
+-            // requestNetworkScan() could call callbacks concurrently, so we use a single thread
+-            // to avoid racing conditions.
+-            Executors.newSingleThreadExecutor(),
+-            callback,
++        registerScan(
++            telephonyManager.requestNetworkScan(
++                createNetworkScan(),
++                // Keep callbacks serial when a retry is needed.
++                scanExecutor,
++                callback,
++            ),
++            initial = true,
+         )
+ 
+         awaitClose {
+-            networkScan.stopScan()
++            val scanToStop = synchronized(scanLock) {
++                closed = true
++                activeScan.also { activeScan = null }
++            }
++            scanToStop?.stopScan()
++            scanExecutor.shutdown()
+             Log.d(TAG, "network scan stopped")
+         }
+     }.conflate().onEach { Log.d(TAG, "networkScanFlow: $it") }.flowOn(Dispatchers.Default)
+ 
+     /** Create network scan for allowed network types. */
+-    private fun createNetworkScan(): NetworkScanRequest {
+-        val allowedNetworkTypes = getAllowedNetworkTypes()
++    private fun createNetworkScan(
++        allowedNetworkTypes: List<Int> = getAllowedNetworkTypes(),
++        maxSearchTimeSec: Int =
++            context.resources.getInteger(R.integer.config_network_scan_helper_max_search_time_sec),
++    ): NetworkScanRequest {
+         Log.d(TAG, "createNetworkScan: allowedNetworkTypes = $allowedNetworkTypes")
+         val radioAccessSpecifiers = allowedNetworkTypes
+             .map { RadioAccessSpecifier(it, null, null) }
+@@ -119,7 +190,7 @@ class NetworkScanRepository(private val context: Context, subId: Int) {
+             NetworkScanRequest.SCAN_TYPE_ONE_SHOT,
+             radioAccessSpecifiers,
+             NetworkScanRequest.MIN_SEARCH_PERIODICITY_SEC, // one shot, not used
+-            context.resources.getInteger(R.integer.config_network_scan_helper_max_search_time_sec),
++            maxSearchTimeSec,
+             true,
+             INCREMENTAL_RESULTS_PERIODICITY_SEC,
+             null,
+@@ -173,5 +244,6 @@ class NetworkScanRepository(private val context: Context, subId: Int) {
+         private const val TAG = "NetworkScanRepository"
+ 
+         private const val INCREMENTAL_RESULTS_PERIODICITY_SEC = 3
++        private const val LTE_ONLY_MAX_SEARCH_TIME_SEC = 60
+     }
+ }
+diff --git a/tests/robotests/src/com/android/settings/display/PeakRefreshRatePreferenceControllerTest.java b/tests/robotests/src/com/android/settings/display/PeakRefreshRatePreferenceControllerTest.java
+index f8e91bd09e9..e2ea34f54fb 100644
+--- a/tests/robotests/src/com/android/settings/display/PeakRefreshRatePreferenceControllerTest.java
++++ b/tests/robotests/src/com/android/settings/display/PeakRefreshRatePreferenceControllerTest.java
+@@ -203,4 +203,35 @@ public class PeakRefreshRatePreferenceControllerTest {
+     public void peakRefreshRate_highestOfAllDisplays_featureFlagOn() {
+         assertThat(mController.mPeakRefreshRate).isEqualTo(130);
+     }
++    @Test
++    public void refreshRateMode_auto_mapsTo60And120() {
++        final float[] rates = PeakRefreshRateListPreferenceController.getRatesForMode("auto");
++        assertThat(rates[0]).isEqualTo(60f);
++        assertThat(rates[1]).isEqualTo(120f);
++    }
++
++    @Test
++    public void refreshRateMode_60_mapsToFixed60() {
++        final float[] rates = PeakRefreshRateListPreferenceController.getRatesForMode("60");
++        assertThat(rates[0]).isEqualTo(60f);
++        assertThat(rates[1]).isEqualTo(60f);
++    }
++
++    @Test
++    public void refreshRateMode_120_mapsToFixed120() {
++        final float[] rates = PeakRefreshRateListPreferenceController.getRatesForMode("120");
++        assertThat(rates[0]).isEqualTo(120f);
++        assertThat(rates[1]).isEqualTo(120f);
++    }
++
++    @Test
++    public void refreshRateMode_detectsConfiguredRates() {
++        assertThat(PeakRefreshRateListPreferenceController.getModeForRates(60f, 120f))
++                .isEqualTo("auto");
++        assertThat(PeakRefreshRateListPreferenceController.getModeForRates(60f, 60f))
++                .isEqualTo("60");
++        assertThat(PeakRefreshRateListPreferenceController.getModeForRates(120f, 120f))
++                .isEqualTo("120");
++    }
++
+ }
+diff --git a/tests/spa_unit/src/com/android/settings/network/telephony/scan/NetworkScanRepositoryTest.kt b/tests/spa_unit/src/com/android/settings/network/telephony/scan/NetworkScanRepositoryTest.kt
+index c0b918fcf5d..512b0e86a50 100644
+--- a/tests/spa_unit/src/com/android/settings/network/telephony/scan/NetworkScanRepositoryTest.kt
++++ b/tests/spa_unit/src/com/android/settings/network/telephony/scan/NetworkScanRepositoryTest.kt
+@@ -32,6 +32,8 @@ import android.telephony.TelephonyManager.NETWORK_CLASS_BITMASK_5G
+ import android.telephony.TelephonyScanManager
+ import androidx.test.core.app.ApplicationProvider
+ import androidx.test.ext.junit.runners.AndroidJUnit4
++import com.android.internal.telephony.CellNetworkScanResult
++import com.android.internal.telephony.OperatorInfo
+ import com.android.settingslib.spa.testutils.firstWithTimeoutOrNull
+ import com.android.settingslib.spa.testutils.toListWithTimeout
+ import com.google.common.truth.Truth.assertThat
+@@ -41,12 +43,15 @@ import kotlinx.coroutines.runBlocking
+ import org.junit.Test
+ import org.junit.runner.RunWith
+ import org.mockito.kotlin.any
++import org.mockito.kotlin.argumentCaptor
+ import org.mockito.kotlin.argThat
+ import org.mockito.kotlin.doAnswer
+ import org.mockito.kotlin.doReturn
+ import org.mockito.kotlin.mock
++import org.mockito.kotlin.never
+ import org.mockito.kotlin.spy
+ import org.mockito.kotlin.stub
++import org.mockito.kotlin.times
+ import org.mockito.kotlin.verify
+ 
+ @RunWith(AndroidJUnit4::class)
+@@ -112,6 +117,13 @@ class NetworkScanRepositoryTest {
+ 
+     @Test
+     fun networkScanFlow_onError(): Unit = runBlocking {
++        val operators = listOf(
++            OperatorInfo("SoftBank", "SoftBank", "44020", AccessNetworkType.EUTRAN)
++        )
++        mockTelephonyManager.stub {
++            on { getAvailableNetworks() } doReturn
++                CellNetworkScanResult(CellNetworkScanResult.STATUS_SUCCESS, operators)
++        }
+         val listDeferred = async {
+             repository.networkScanFlow().toListWithTimeout()
+         }
+@@ -119,12 +131,33 @@ class NetworkScanRepositoryTest {
+ 
+         callback?.onError(1)
+ 
+-        assertThat(listDeferred.await()).containsExactly(
+-            NetworkScanRepository.NetworkScanResult(
+-                state = NetworkScanRepository.NetworkScanState.ERROR,
+-                cellInfos = emptyList(),
+-            )
++        val results = listDeferred.await()
++        assertThat(results.last().state).isEqualTo(NetworkScanRepository.NetworkScanState.COMPLETE)
++        assertThat(results.last().operators).containsExactlyElementsIn(operators)
++        verify(mockTelephonyManager).getAvailableNetworks()
++    }
++
++    @Test
++    fun networkScanFlow_invalidScanRetriesLteOnly(): Unit = runBlocking {
++        val listDeferred = async {
++            repository.networkScanFlow().toListWithTimeout()
++        }
++        delay(100)
++
++        callback?.onError(NetworkScan.ERROR_INVALID_SCAN)
++        delay(100)
++
++        val requests = argumentCaptor<NetworkScanRequest>()
++        verify(mockTelephonyManager, times(2)).requestNetworkScan(
++            requests.capture(), any(), any()
+         )
++        assertThat(requests.lastValue.specifiers.map { it.radioAccessNetwork })
++            .containsExactly(AccessNetworkType.EUTRAN)
++        assertThat(requests.lastValue.maxSearchTime).isEqualTo(60)
++        verify(mockTelephonyManager, never()).getAvailableNetworks()
++
++        callback?.onError(NetworkScan.ERROR_MODEM_ERROR)
++        listDeferred.await()
+     }
+ 
+     @Test

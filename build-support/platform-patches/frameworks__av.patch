@@ -1,0 +1,347 @@
+diff --git a/camera/ndk/Android.bp b/camera/ndk/Android.bp
+index 7ae825e6a6..613d0dc490 100644
+--- a/camera/ndk/Android.bp
++++ b/camera/ndk/Android.bp
+@@ -119,6 +119,9 @@ cc_library_shared {
+ 
+ cc_library_shared {
+     name: "libcamera2ndk_vendor",
++    // xuanyuan ships a Xiaomi stock libcamera2ndk_vendor.so required by mifaced.
++    // Keep this AOSP library buildable for dependencies but do not install it.
++    installable: false,
+     vendor: true,
+     srcs: [
+         "NdkCameraCaptureSession.cpp",
+diff --git a/media/audioaidlconversion/Android.bp b/media/audioaidlconversion/Android.bp
+index 249b18c528..bdf261f413 100644
+--- a/media/audioaidlconversion/Android.bp
++++ b/media/audioaidlconversion/Android.bp
+@@ -132,6 +132,41 @@ cc_library {
+  */
+ cc_library {
+     name: "libaudio_aidl_conversion_common_ndk",
++    // The stock xuanyuan vendor library owns the vendor install path.
++    installable: false,
++    srcs: [
++        "AidlConversionCppNdk.cpp",
++        "AidlConversionNdk.cpp",
++    ],
++    header_libs: [
++        "libaudio_aidl_conversion_common_util_ndk",
++    ],
++    export_header_lib_headers: [
++        "libaudio_aidl_conversion_common_util_ndk",
++    ],
++    defaults: [
++        "audio_aidl_conversion_common_default",
++        "latest_android_hardware_audio_common_ndk_shared",
++        "latest_android_media_audio_common_types_ndk_shared",
++    ],
++    shared_libs: [
++        "libbase",
++        "libbinder_ndk",
++    ],
++    static_libs: [
++        "libaudioaidlcommon",
++    ],
++    cflags: [
++        "-DBACKEND_NDK",
++    ],
++    min_sdk_version: "31", //AParcelableHolder has been introduced in 31
++}
++
++// Install the framework copy separately; system modules still link the original.
++cc_library {
++    name: "libaudio_aidl_conversion_common_ndk_system",
++    stem: "libaudio_aidl_conversion_common_ndk",
++    vendor_available: false,
+     srcs: [
+         "AidlConversionCppNdk.cpp",
+         "AidlConversionNdk.cpp",
+diff --git a/media/codec2/hal/aidl/Android.bp b/media/codec2/hal/aidl/Android.bp
+index e294a316c8..839eb84f4f 100644
+--- a/media/codec2/hal/aidl/Android.bp
++++ b/media/codec2/hal/aidl/Android.bp
+@@ -82,6 +82,7 @@ cc_library {
+     ],
+ 
+     header_libs: [
++        "libcodec2_hidl_plugin_headers",
+         "libcodec2_internal", // private
+     ],
+ 
+@@ -175,6 +176,7 @@ cc_library {
+     ],
+ 
+     header_libs: [
++        "libcodec2_hidl_plugin_headers",
+         "libcodec2_internal", // private
+     ],
+ 
+diff --git a/media/codec2/hal/hidl/1.0/utils/Android.bp b/media/codec2/hal/hidl/1.0/utils/Android.bp
+index ba269ba97d..047f2455f6 100644
+--- a/media/codec2/hal/hidl/1.0/utils/Android.bp
++++ b/media/codec2/hal/hidl/1.0/utils/Android.bp
+@@ -76,6 +76,7 @@ cc_library {
+ 
+     header_libs: [
+         "libbinder_headers",
++        "libcodec2_hidl_plugin_headers",
+         "libcodec2_internal", // private
+         "libsystem_headers",
+     ],
+diff --git a/media/codec2/hal/hidl/1.1/utils/Android.bp b/media/codec2/hal/hidl/1.1/utils/Android.bp
+index c5d16731bd..f82d531127 100644
+--- a/media/codec2/hal/hidl/1.1/utils/Android.bp
++++ b/media/codec2/hal/hidl/1.1/utils/Android.bp
+@@ -78,6 +78,7 @@ cc_library {
+ 
+     header_libs: [
+         "libbinder_headers",
++        "libcodec2_hidl_plugin_headers",
+         "libsystem_headers",
+         "libcodec2_internal", // private
+     ],
+diff --git a/media/codec2/hal/hidl/1.2/utils/Android.bp b/media/codec2/hal/hidl/1.2/utils/Android.bp
+index 2cd58f7acd..37e42efb2a 100644
+--- a/media/codec2/hal/hidl/1.2/utils/Android.bp
++++ b/media/codec2/hal/hidl/1.2/utils/Android.bp
+@@ -83,6 +83,7 @@ cc_library {
+ 
+     header_libs: [
+         "libbinder_headers",
++        "libcodec2_hidl_plugin_headers",
+         "libsystem_headers",
+         "libcodec2_internal", // private
+     ],
+diff --git a/media/codec2/hal/plugin/Android.bp b/media/codec2/hal/plugin/Android.bp
+index 873bb028ce..b066ff5796 100644
+--- a/media/codec2/hal/plugin/Android.bp
++++ b/media/codec2/hal/plugin/Android.bp
+@@ -10,8 +10,15 @@ package {
+ cc_library_headers {
+     name: "libcodec2_hidl_plugin_headers",
+     vendor_available: true,
++    min_sdk_version: "29",
++    apex_available: [
++        "//apex_available:platform",
++        "com.android.media.swcodec",
++        "test_com.android.media.swcodec",
++    ],
+     export_include_dirs: [
+         "include",
++        "internal",
+     ],
+ }
+ 
+diff --git a/media/libaudiohal/impl/Hal2AidlMapper.cpp b/media/libaudiohal/impl/Hal2AidlMapper.cpp
+index 0f3863b613..569007b67a 100644
+--- a/media/libaudiohal/impl/Hal2AidlMapper.cpp
++++ b/media/libaudiohal/impl/Hal2AidlMapper.cpp
+@@ -638,7 +638,14 @@ Hal2AidlMapper::Ports::iterator Hal2AidlMapper::findPort(
+                         std::find(prof.sampleRates.begin(), prof.sampleRates.end(),
+                                 config.base.sampleRate) != prof.sampleRates.end());
+     };
+-    static const std::vector<AudioOutputFlags> kOptionalOutputFlags{AudioOutputFlags::BIT_PERFECT};
++    // Some Qualcomm AIDL HALs expose the primary low-latency mix port as
++    // PRIMARY|FAST while AudioPolicy opens the initial primary output with
++    // PRIMARY only. Treat FAST as an optional HAL-side capability so the
++    // primary speaker route remains matchable.
++    static const std::vector<AudioOutputFlags> kOptionalOutputFlags{
++            AudioOutputFlags::BIT_PERFECT,
++            AudioOutputFlags::FAST,
++    };
+     int optionalFlags = 0;
+     auto flagMatches = [&flags, &optionalFlags](const AudioIoFlags& portFlags) {
+         // Ports should be able to match if the optional flags are not requested.
+diff --git a/media/libeffects/downmix/Android.bp b/media/libeffects/downmix/Android.bp
+index 19b80829f2..2a36a1f63f 100644
+--- a/media/libeffects/downmix/Android.bp
++++ b/media/libeffects/downmix/Android.bp
+@@ -51,6 +51,7 @@ cc_library {
+ 
+ cc_library_shared {
+     name: "libdownmixaidl",
++    installable: false,
+     srcs: [
+         ":effectCommonFile",
+         "aidl/DownmixContext.cpp",
+diff --git a/media/libeffects/dynamicsproc/Android.bp b/media/libeffects/dynamicsproc/Android.bp
+index 12477a49b8..ba0cee8155 100644
+--- a/media/libeffects/dynamicsproc/Android.bp
++++ b/media/libeffects/dynamicsproc/Android.bp
+@@ -78,6 +78,7 @@ cc_library_shared {
+ 
+ cc_library_shared {
+     name: "libdynamicsprocessingaidl",
++    installable: false,
+ 
+     srcs: [
+         ":effectCommonFile",
+diff --git a/media/libeffects/loudness/Android.bp b/media/libeffects/loudness/Android.bp
+index 775568ac66..606b7bb565 100644
+--- a/media/libeffects/loudness/Android.bp
++++ b/media/libeffects/loudness/Android.bp
+@@ -48,6 +48,7 @@ cc_library {
+ 
+ cc_library_shared {
+     name: "libloudnessenhanceraidl",
++    installable: false,
+     srcs: [
+         ":effectCommonFile",
+         "aidl/EffectLoudnessEnhancer.cpp",
+diff --git a/media/libeffects/lvm/wrapper/Android.bp b/media/libeffects/lvm/wrapper/Android.bp
+index 5b4804556c..faef99dd17 100644
+--- a/media/libeffects/lvm/wrapper/Android.bp
++++ b/media/libeffects/lvm/wrapper/Android.bp
+@@ -104,6 +104,7 @@ cc_library {
+ 
+ cc_library_shared {
+     name: "libbundleaidl",
++    installable: false,
+     srcs: [
+         ":effectCommonFile",
+         "Aidl/BundleContext.cpp",
+@@ -136,6 +137,7 @@ cc_library_shared {
+ 
+ cc_library_shared {
+     name: "libreverbaidl",
++    installable: false,
+     srcs: [
+         ":effectCommonFile",
+         "Reverb/aidl/EffectReverb.cpp",
+diff --git a/media/libeffects/visualizer/Android.bp b/media/libeffects/visualizer/Android.bp
+index 8f1d8da4e8..4fd3d5e0f4 100644
+--- a/media/libeffects/visualizer/Android.bp
++++ b/media/libeffects/visualizer/Android.bp
+@@ -53,6 +53,7 @@ cc_library_shared {
+ 
+ cc_library_shared {
+     name: "libvisualizeraidl",
++    installable: false,
+     srcs: [
+         ":effectCommonFile",
+         "aidl/Visualizer.cpp",
+diff --git a/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp b/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp
+index 10973417e8..e16a97ea95 100644
+--- a/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp
++++ b/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp
+@@ -192,7 +192,12 @@ sp<const AudioPolicyConfig> AudioPolicyConfig::loadFromApmAidlConfigWithFallback
+     if (status_t status = config->loadFromAidl(aidl); status == NO_ERROR) {
+         return config;
+     }
+-    return createDefault();
++    // Some stock Qualcomm AIDL audio HALs expose policy data that newer
++    // framework conversions reject. Falling back to the generic in-memory
++    // default leaves the primary speaker unreachable. Reuse the vendor XML
++    // policy instead; it is the authoritative policy shipped with the device.
++    ALOGW("AIDL audio policy config is incompatible; falling back to vendor XML");
++    return loadFromApmXmlConfigWithFallback();
+ }
+ 
+ // static
+diff --git a/services/audiopolicy/engineconfigurable/src/Engine.cpp b/services/audiopolicy/engineconfigurable/src/Engine.cpp
+index c33ef023f9..e958902d41 100644
+--- a/services/audiopolicy/engineconfigurable/src/Engine.cpp
++++ b/services/audiopolicy/engineconfigurable/src/Engine.cpp
+@@ -36,7 +36,9 @@
+ 
+ #include <media/TypeConverter.h>
+ 
++#include <algorithm>
+ #include <cinttypes>
++#include <set>
+ 
+ using std::string;
+ using std::map;
+@@ -44,6 +46,53 @@ using std::map;
+ namespace android {
+ namespace audio_policy {
+ 
++namespace {
++
++bool hasMediaSpeakerVolumeCurve(
++        const media::audio::common::AudioHalEngineConfig& config) {
++    using media::audio::common::AudioHalVolumeCurve;
++    using media::audio::common::AudioStreamType;
++    using media::audio::common::AudioUsage;
++
++    std::set<std::string> mediaVolumeGroupNames;
++    for (const auto& strategy : config.productStrategies) {
++        for (const auto& attributesGroup : strategy.attributesGroups) {
++            const bool isMediaStream =
++                    attributesGroup.streamType == AudioStreamType::MUSIC;
++            const bool hasMediaAttributes = std::any_of(
++                    attributesGroup.attributes.begin(), attributesGroup.attributes.end(),
++                    [](const auto& attributes) {
++                        return attributes.usage == AudioUsage::MEDIA ||
++                                attributes.usage == AudioUsage::GAME ||
++                                attributes.usage ==
++                                        AudioUsage::ASSISTANCE_NAVIGATION_GUIDANCE;
++                    });
++            if ((isMediaStream || hasMediaAttributes) &&
++                    !attributesGroup.volumeGroupName.empty()) {
++                mediaVolumeGroupNames.insert(attributesGroup.volumeGroupName);
++            }
++        }
++    }
++    if (mediaVolumeGroupNames.empty()) {
++        return false;
++    }
++
++    return std::any_of(config.volumeGroups.begin(), config.volumeGroups.end(),
++            [&mediaVolumeGroupNames](const auto& volumeGroup) {
++                if (mediaVolumeGroupNames.count(volumeGroup.name) == 0) {
++                    return false;
++                }
++                return std::any_of(volumeGroup.volumeCurves.begin(),
++                        volumeGroup.volumeCurves.end(), [](const auto& curve) {
++                            return curve.deviceCategory ==
++                                            AudioHalVolumeCurve::DeviceCategory::SPEAKER &&
++                                    !curve.curvePoints.empty();
++                        });
++            });
++}
++
++}  // namespace
++
+ template <>
+ StreamCollection &Engine::getCollection<audio_stream_type_t>()
+ {
+@@ -68,6 +117,13 @@ const InputSourceCollection &Engine::getCollection<audio_source_t>() const
+ 
+ status_t Engine::loadFromHalConfigWithFallback(
+         const media::audio::common::AudioHalEngineConfig& aidlConfig) {
++#ifndef DISABLE_CAP_AIDL
++    if (!hasMediaSpeakerVolumeCurve(aidlConfig)) {
++        ALOGE("%s AIDL engine config has no media speaker volume curve, falling back on vendor XML",
++              __func__);
++        return loadFromXmlConfigWithFallback(engineConfig::DEFAULT_PATH);
++    }
++#endif
+ #ifdef DISABLE_CAP_AIDL
+     (void) aidlConfig;
+     ALOGE("%s CapEngine Config disabled, falling back on vendor XML for engine", __func__);
+diff --git a/services/audiopolicy/enginedefault/src/Engine.cpp b/services/audiopolicy/enginedefault/src/Engine.cpp
+index 53cc9eb78c..e34165251b 100644
+--- a/services/audiopolicy/enginedefault/src/Engine.cpp
++++ b/services/audiopolicy/enginedefault/src/Engine.cpp
+@@ -26,6 +26,7 @@
+ 
+ #include "Engine.h"
+ #include <android-base/macros.h>
++#include <android-base/properties.h>
+ #include <AudioPolicyManagerObserver.h>
+ #include <PolicyAudioPort.h>
+ #include <IOProfile.h>
+@@ -41,6 +42,10 @@ namespace android::audio_policy {
+ 
+ status_t Engine::loadFromHalConfigWithFallback(
+         const media::audio::common::AudioHalEngineConfig& aidlConfig) {
++    if (android::base::GetProperty("ro.product.device", "") == "xuanyuan") {
++        ALOGW("Using XML audio policy engine config for xuanyuan volume fix");
++        return loadFromXmlConfigWithFallback(engineConfig::DEFAULT_PATH);
++    }
+     return loadWithFallback(aidlConfig);
+ }
+ 

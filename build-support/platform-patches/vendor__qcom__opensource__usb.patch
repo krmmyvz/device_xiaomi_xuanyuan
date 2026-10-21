@@ -1,0 +1,57 @@
+diff --git a/hal/Android.bp b/hal/Android.bp
+index e4e3dcf..504de24 100644
+--- a/hal/Android.bp
++++ b/hal/Android.bp
+@@ -8,7 +8,8 @@ cc_defaults {
+ }
+ 
+ cc_binary {
+-    name: "android.hardware.usb-service.qti",
++    name: "android.hardware.usb-service.qti-xuanyuan",
++    stem: "android.hardware.usb-service.qti",
+     defaults: ["qti_usb_hal_defaults"],
+     shared_libs: [
+         "android.hardware.usb-V1-ndk",
+@@ -52,7 +53,8 @@ cc_fuzz {
+ }
+ 
+ cc_binary {
+-    name: "android.hardware.usb.gadget-service.qti",
++    name: "android.hardware.usb.gadget-service.qti-xuanyuan",
++    stem: "android.hardware.usb.gadget-service.qti",
+     defaults: ["qti_usb_hal_defaults"],
+     shared_libs: [
+         "android.hardware.usb.gadget@1.1",
+diff --git a/hal/Usb.cpp b/hal/Usb.cpp
+index 911be35..b4f861a 100644
+--- a/hal/Usb.cpp
++++ b/hal/Usb.cpp
+@@ -40,7 +40,7 @@
+ #include <sys/types.h>
+ #include <thread>
+ #include <unistd.h>
+-#include <unordered_map>
++#include <map>
+ 
+ #include <cutils/uevent.h>
+ #include <linux/usb/ch9.h>
+@@ -512,8 +512,8 @@ static Status getCurrentRoleHelper(const std::string &portName, bool connected,
+   return Status::SUCCESS;
+ }
+ 
+-static std::unordered_map<std::string, bool> getTypeCPortNamesHelper() {
+-  std::unordered_map<std::string, bool> names;
++static std::map<std::string, bool> getTypeCPortNamesHelper() {
++  std::map<std::string, bool> names;
+   DIR *dp;
+   dp = opendir("/sys/class/typec/");
+   if (dp != NULL) {
+@@ -524,7 +524,7 @@ static std::unordered_map<std::string, bool> getTypeCPortNamesHelper() {
+         std::string entry = ep->d_name;
+         auto n = entry.find("-partner");
+         if (n == std::string::npos) {
+-          std::unordered_map<std::string, bool>::const_iterator portName =
++          std::map<std::string, bool>::const_iterator portName =
+               names.find(entry);
+           if (portName == names.end()) {
+             names.insert({entry, false});

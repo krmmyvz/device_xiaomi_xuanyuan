@@ -1,0 +1,26 @@
+# Local host authorization is not a distributable build input.
+/recovery/adb_keys
+__pycache__/
+*.pyc
+*.bak*
+*.before-*
+*.pre-*
+*.orig
+*.fix6.bak
+
+# ---------------------------------------------------------------------------
+# Original Xiaomi binaries. They come from the private vendor repository
+# through scripts/sync_proprietary.sh and are never committed.
+# ---------------------------------------------------------------------------
+/prebuilts/miuicamera/
+/prebuilts/camera/
+/prebuilts/esim/
+/prebuilts/stock-codecs/
+/prebuilts/stock/
+/prebuilts/product/
+/rootdir/
+/neoteric_compat/
+
+# macOS
+.DS_Store
+._*

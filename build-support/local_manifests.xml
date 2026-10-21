@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  local_manifests.xml - xuanyuan (Xiaomi 15 Ultra) cihaz agacini platform
+  manifestine baglayan yerel manifest.
+
+  Bu dosya .repo/local_manifests/ icine kopyalanir ve asagidaki projeleri
+  pinli EvoX manifestinin (build-support/evox-manifest-pinned.xml) uzerine ekler.
+
+  Kapsam:
+    - device/xiaomi/xuanyuan        : cihaz agaci (bu repo, public)
+    - device/xiaomi/sm8750-common   : SM8750 ortak urun katmani
+    - kernel/xiaomi/generic         : prebuilt GKI kernel + dtb/dtbo/vendor_boot
+    - vendor/xiaomi/xuanyuan        : Xiaomi proprietary vendor blob agaci
+
+  REMOTE'LAR:
+  Pinned manifestteki <remote> tanimlari buraya tasindi ve pinned manifestten
+  cikarildi. Ayni remote adi iki manifest icinde farkli fetch/review ile
+  tanimlanirsa repo sync
+  "remote <isim> already exists with different attributes" ile durur.
+
+  Not: 'github' remote'u fetch=".." ile göreli yol kullanir (LineageOS
+  convention); local manifestte de aynen korunur.
+-->
+<manifest>
+  <!--
+    Pinned EvoX platform manifest. Bu dosya .repo/local_manifests/ icine
+    kopyalanir ve oradan include edilir; boylece base manifest
+    (.repo/manifests/default.xml) degistirilmez.
+
+    Neden include, neden base manifest'i degistirmek degil:
+    repo, .repo/manifests/default.xml dosyasini manifest deposunun git'inden
+    geri yukleyebilir. Boyle bir durumda base manifest degistirilmis olsa
+    pinned projeler birlesik manifestten kaybolur ve 21 proje 'reference
+    broken' hatasiyla sync edilemez. Include yontemi kalicidir.
+  -->
+  <include name="evox-manifest-pinned.xml" />
+  <remote name="aosp" fetch="https://android.googlesource.com" review="android-review.googlesource.com" revision="refs/tags/android-16.0.0_r4"/>
+  <remote name="evo" fetch="https://github.com/Evolution-X" revision="refs/heads/bka"/>
+  <remote name="evo-devices" fetch="https://github.com/Evolution-X-Devices" revision="refs/heads/bka"/>
+  <remote name="evo-tensor" fetch="https://git.evolution-x.org/Evolution-X-Tensor" revision="refs/heads/bka"/>
+  <!-- fetch=".." bir placeholder DEGILDIR: repo init -u <url> ile verilen
+       URL'den son segment ("manifest") dusulur ve base "https://github.com/"
+       olur. Boylece "LineageOS/android_xyz" proje adlari dogru adrese
+       (https://github.com/LineageOS/android_xyz) cozulur. Burada elle bir
+       adres yazmak remote'un cozumlemesini bozar. -->
+  <remote name="github" fetch=".." review="review.lineageos.org"/>
+  <remote name="github-non-los" fetch="https://github.com"/>
+  <remote name="gitlab" fetch="https://gitlab.com"/>
+  <remote name="private" fetch="ssh://git@github.com"/>
+
+  <default remote="github" revision="refs/heads/lineage-23.2" sync-j="4" sync-c="true"/>
+
+  <!-- Cihaz agaci: bu repodan build sirasinda guncellenmemis olmali. -->
+  <project name="krmmyvz/device_xiaomi_xuanyuan"
+           path="device/xiaomi/xuanyuan"
+           remote="github-non-los"
+           revision="refs/heads/main"/>
+
+  <!--
+    SM8750 ortak katman: device.mk -> device/xiaomi/sm8750-common/common.mk
+
+    Bu repo icerigi repo kokunde tutar (sm8750-common/ alt klasoru YOK), bu yuzden
+    path dogrudan 'device/xiaomi/sm8750-common' olur.
+
+    Not: path 'device/xiaomi' olsaydi hem ic ice cakisma olurdu (asagida
+    device/xiaomi/xuanyuan ve device/xiaomi/xuanyuan-kernel var), hem de
+    device.mk'nin bekledigi yol yanlis olurdu.
+  -->
+  <project name="krmmyvz/device_xiaomi_sm8750_common"
+           path="device/xiaomi/sm8750-common"
+           remote="github-non-los"
+           revision="refs/heads/main"/>
+
+  <!-- Prebuilt kernel: BoardConfig.mk -> TARGET_KERNEL_SOURCE=kernel/xiaomi/generic -->
+  <project name="krmmyvz/kernel_xiaomi_generic"
+           path="kernel/xiaomi/generic"
+           remote="github-non-los"
+           revision="refs/heads/main"/>
+
+  <!--
+    Xiaomi proprietary vendor blob'lari: xiaomi-8750/proprietary_vendor_xuanyuan
+    (beryl) KALDIRILDI.
+
+    Neden: o agac A15 kokenli ve eksik. Kendi AIDL mirror kutuphaneleri
+    (composer3-V2/V3, offlinecamera-V2, camera.device-V2, camera.metadata-V2)
+    hic yok; halbuki sm8750 CAF'in cc_defaults'i ve vendor'in kendi
+    Android.bp'si onlari gerektiriyor -> "depends on undefined module".
+    Ayrica kendi icinde tutarsiz: composer-service binary'si composer3 V3
+    istiyor, Android.bp ise V4 yaziyor.
+
+    Yerine: cihazdan uretilen OS4.0.0.6 vendor agaci kurulur
+    (scripts/install_vendor_tree.sh, from degeriyle artifact). Dizin manifest'te
+    olmadigi icin repo sync onu yazmaz; icerik artifact yonetimindedir.
+  -->
+
+  <!--
+    device/xiaomi/xuanyuan-kernel KALDIRILDI.
+
+    Bu proje Android.bp icinde qti_kernel_headers, qti_display_kernel_headers
+    ve qti_ipa_kernel_headers modullerini tanimliyor. Ayni moduller
+    hardware/qcom-caf/common/Android.bp icinde de tanimli oldugu icin Soong
+    analizi su hatayi veriyor ve hicbir sey derlenmiyor:
+
+      error: hardware/qcom-caf/common/Android.bp:16:1:
+             module "qti_display_kernel_headers" already defined
+             device/xiaomi/xuanyuan-kernel/Android.bp:13:1 (previous definition)
+
+    Ayrica bu projeye cihaz agacinda HICBIR referans yok: BoardConfig.mk
+    kernel'i "kernel/xiaomi/generic" (prebuilt GKI) uzerinden aliyor.
+    Yani proje hem cakisma yaratiyor hem de kullanilmiyor.
+  -->
+
+  <!--
+    hardware/xiaomi namespace'i: cihaz agacinin Android.bp dosyasi
+    "soong_namespace { name: "hardware/xiaomi" }" ilan ediyor, ancak bu
+    namespace'i tanimlayan proje manifestte yoktu. Soong analizi su hatayi
+    veriyor ve derleme baslamiyor:
+
+      error: device/xiaomi/xuanyuan/Android.bp:6:1: module "soong_namespace":
+             namespace hardware/xiaomi does not exist
+
+    Kaynak: xiaomi-8750/android_hardware_xiaomi (branch beryl). HIDL
+    HAL'lar (hidl/, interfaces/, sensors/, telephony/, fingerprint/).
+  -->
+  <project name="xiaomi-8750/android_hardware_xiaomi"
+           path="hardware/xiaomi"
+           remote="github-non-los"
+           revision="refs/heads/beryl"/>
+</manifest>

@@ -1,0 +1,12 @@
+# Xiaomi xuanyuan stock fingerprint service.
+# The stock rc uses an explicit seclabel (u:r:vendor_mfp-daemon:s0).
+# Define the domain so init can apply that label; additional enforcing
+# permissions can be tightened after functional validation.
+type vendor_mfp-daemon, domain;
+type vendor_mfp-daemon_exec, exec_type, vendor_file_type, file_type;
+type vendor_mfp-daemon_data_file, file_type, data_file_type;
+
+hal_server_domain(vendor_mfp-daemon, hal_fingerprint)
+init_daemon_domain(vendor_mfp-daemon)
+
+allow vendor_mfp-daemon self:capability sys_nice;

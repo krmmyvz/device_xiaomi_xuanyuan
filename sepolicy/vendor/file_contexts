@@ -1,0 +1,21 @@
+# Stock xuanyuan places the Thales security HALs in /odm, while the
+# inherited vendor policy only labels /vendor paths.  Without these
+# entries they run as u:r:init:s0 and break KeyMint/Gatekeeper startup.
+/odm/bin/hw/android\.hardware\.security\.keymint-service\.strongbox-thales    u:object_r:vendor_hal_keymint_strongbox_exec:s0
+/odm/bin/hw/android\.hardware\.weaver-service\.thales                         u:object_r:vendor_hal_weaver_default_exec:s0
+
+# Stock Xiaomi fingerprint daemon and its private data.
+/(vendor|system/vendor|odm)/bin/hw/mfp-daemon                                      u:object_r:vendor_mfp-daemon_exec:s0
+/data/vendor/misc/mi_fp(/.*)?                                                       u:object_r:vendor_mfp-daemon_data_file:s0
+
+# Xiaomi battery authentication daemon
+/(vendor|system/vendor)/bin/batterysecret    u:object_r:batterysecret_exec:s0
+
+# AIDL Xiaomi fingerprint HAL wrapper
+/vendor/bin/hw/android\.hardware\.biometrics\.fingerprint-service\.xiaomi    u:object_r:hal_fingerprint_default_exec:s0
+
+# Xiaomi MI_RIC stability daemon
+/(vendor|system/vendor)/bin/MI_RIC    u:object_r:mi_ric_exec:s0
+
+# SPI transmitter used by the stock 303 consumer IR HAL.
+/dev/ir_spi    u:object_r:vendor_ir_spi_device:s0

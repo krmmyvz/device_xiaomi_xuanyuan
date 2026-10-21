@@ -1,0 +1,17 @@
+diff --git a/libwifi_system_iface/Android.bp b/libwifi_system_iface/Android.bp
+index d79340974..5befac237 100644
+--- a/libwifi_system_iface/Android.bp
++++ b/libwifi_system_iface/Android.bp
+@@ -28,6 +28,12 @@ wifi_system_iface_cflags = [
+     "-Wwrite-strings",
+ ]
+ 
++cc_library_headers {
++    name: "xuanyuan_wifi_system_iface_headers",
++    vendor_available: true,
++    export_include_dirs: ["include"],
++}
++
+ // Device independent wifi system logic.
+ // ============================================================
+ cc_library {

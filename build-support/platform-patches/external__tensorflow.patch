@@ -1,0 +1,30 @@
+diff --git a/tensorflow/lite/Android.bp b/tensorflow/lite/Android.bp
+index aa06e078550..092861b9b05 100644
+--- a/tensorflow/lite/Android.bp
++++ b/tensorflow/lite/Android.bp
+@@ -146,6 +146,25 @@ cc_library_shared {
+     name: "libtensorflowlite_c",
+     defaults: ["tflite_defaults"],
+     whole_static_libs: ["libtflite_static"],
++    vendor_available: true,
++    target: {
++        android_arm64: {
++            srcs: [
++                "delegates/xnnpack/quantization_util.cc",
++                "delegates/xnnpack/xnnpack_delegate.cc",
++            ],
++            header_libs: [
++                "fp16_headers",
++                "gemmlowp_headers",
++                "libeigen",
++            ],
++            whole_static_libs: ["libXNNPACK"],
++            cflags: [
++                "-DXNNPACK_DELEGATE_ENABLE_QS8=1",
++                "-DXNNPACK_DELEGATE_ENABLE_QU8=1",
++            ],
++        },
++    },
+     stl: "libc++_static",
+     version_script: "c/version_script.lds",
+     export_header_lib_headers: ["tensorflow_headers"],

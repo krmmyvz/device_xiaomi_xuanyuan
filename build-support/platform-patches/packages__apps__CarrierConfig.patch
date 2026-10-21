@@ -1,0 +1,14 @@
+diff --git a/assets/carrier_config_carrierid_2110_UQ-mobile.xml b/assets/carrier_config_carrierid_2110_UQ-mobile.xml
+index 10ec721..da0a5a0 100644
+--- a/assets/carrier_config_carrierid_2110_UQ-mobile.xml
++++ b/assets/carrier_config_carrierid_2110_UQ-mobile.xml
+@@ -27,4 +27,9 @@
+         <item value="440093"/>
+         <item value="440094"/>
+     </string-array>
++
++    <!-- xuanyuan Qualcomm IMS / VoLTE -->
++    <boolean name="carrier_volte_available_bool" value="true"/>
++    <boolean name="carrier_volte_provisioned_bool" value="true"/>
++    <string name="config_ims_mmtel_package_override_string">org.codeaurora.ims</string>
+ </carrier_config>

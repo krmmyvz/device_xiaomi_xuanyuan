@@ -1,0 +1,16 @@
+diff --git a/quickstep/src/com/android/quickstep/views/RecentsView.java b/quickstep/src/com/android/quickstep/views/RecentsView.java
+index 111c99b53a..1b417243c5 100644
+--- a/quickstep/src/com/android/quickstep/views/RecentsView.java
++++ b/quickstep/src/com/android/quickstep/views/RecentsView.java
+@@ -901,6 +901,11 @@ public abstract class RecentsView<
+         final int rotation = mContainer.getDisplay().getRotation();
+         mOrientationState.setRecentsRotation(rotation);
+ 
++        // TaskView uses RecentsDependencies for its dispatcher and coroutine scope even when
++        // the thumbnail refactor is disabled. Initialize the global scope before any TaskView
++        // can be created, including the stub task created at the start of a swipe-up gesture.
++        RecentsDependencies.maybeInitialize(context, ProductionDispatchers.INSTANCE);
++
+         // Start Recents Dependency graph
+         if (enableRefactorTaskThumbnail()) {
+             RecentsDependencies recentsDependencies =
