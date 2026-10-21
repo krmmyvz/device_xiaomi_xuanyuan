@@ -22,6 +22,18 @@
   convention); local manifestte de aynen korunur.
 -->
 <manifest>
+  <!--
+    Pinned EvoX platform manifest. Bu dosya .repo/local_manifests/ icine
+    kopyalanir ve oradan include edilir; boylece base manifest
+    (.repo/manifests/default.xml) degistirilmez.
+
+    Neden include, neden base manifest'i degistirmek degil:
+    repo, .repo/manifests/default.xml dosyasini manifest deposunun git'inden
+    geri yukleyebilir. Boyle bir durumda base manifest degistirilmis olsa
+    pinned projeler birlesik manifestten kaybolur ve 21 proje 'reference
+    broken' hatasiyla sync edilemez. Include yontemi kalicidir.
+  -->
+  <include name="evox-manifest-pinned.xml" />
   <remote name="aosp" fetch="https://android.googlesource.com" review="android-review.googlesource.com" revision="refs/tags/android-16.0.0_r4"/>
   <remote name="evo" fetch="https://github.com/Evolution-X" revision="refs/heads/bka"/>
   <remote name="evo-devices" fetch="https://github.com/Evolution-X-Devices" revision="refs/heads/bka"/>

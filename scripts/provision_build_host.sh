@@ -162,10 +162,12 @@ Derleme adimlari (root olmayan kullanici olarak):
   #    Iki manifest ayni remote'u farkli fetch ile tanimlarsa repo sync
   #    "remote ... already exists with different attributes" ile durur.
   repo init -u https://github.com/Evolution-X/manifest -b bka --depth=1
-  cp <device-tree>/build-support/evox-manifest-pinned.xml .repo/manifests/default.xml
-  rm -f .repo/local_manifests
+  # ONCE dizini temizle, SONRA iki dosyayi da kopyala. Daha once
+  # "rm -f .repo/local_manifests" pinned manifest'i da siliyordu.
+  rm -rf .repo/local_manifests
   mkdir -p .repo/local_manifests
-  cp <device-tree>/build-support/local_manifests.xml .repo/local_manifests/local_manifests.xml
+  cp <device-tree>/build-support/evox-manifest-pinned.xml .repo/local_manifests/
+  cp <device-tree>/build-support/local_manifests.xml       .repo/local_manifests/local_manifests.xml
 
   # ~131 GB (checkout+.git); --depth=1 .git'i kucultur, checkout ayni kalir
   repo sync -c -j\$(nproc)
