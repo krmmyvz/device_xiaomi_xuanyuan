@@ -199,7 +199,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_SOONG_NAMESPACES += \
     $(LOCAL_PATH) \
     hardware/qcom-caf/wlan \
-    hardware/xiaomi
+    hardware/qcom-caf/sm8750 \
+    hardware/xiaomi \
+    vendor/xiaomi/xuanyuan
 
 # Inherit the proprietary files
 $(call inherit-product, vendor/xiaomi/xuanyuan/xuanyuan-vendor.mk)
@@ -254,15 +256,6 @@ PRODUCT_PACKAGES += \
     vendor.qti.hardware.display.allocator@4.0.vendor
 
 # Stable AIDL compatibility libraries required by the stock Android 15 audio HAL.
-PRODUCT_PACKAGES += \
-    android.hardware.audio.common-V3-ndk.vendor \
-    android.hardware.audio.core-V2-ndk.vendor \
-    android.hardware.audio.core.sounddose-V1-ndk.vendor \
-    android.hardware.audio.effect-V2-ndk.vendor \
-    android.media.audio.common.types-V2-ndk.vendor \
-    android.media.audio.common.types-V3-ndk.vendor \
-    libmediautils_vendor.vendor
-
 # Retain the stock303 V4 provider/session ABI used by QTI software A2DP.
 PRODUCT_PACKAGES += \
     android.hardware.bluetooth.audio-V4-ndk.vendor \

@@ -7,6 +7,9 @@ soong_namespace {
     imports: [
         "hardware/xiaomi",
         "hardware/qcom-caf/bootctrl",
+        ".",
+        "hardware/qcom-caf/sm8750",
+        "vendor/xiaomi/xuanyuan",
     ],
 }
 
