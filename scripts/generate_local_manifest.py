@@ -40,31 +40,41 @@ def ser(e: ET.Element, indent: str = "  ") -> list[str]:
     return out
 
 
-def load_base(manifests: pathlib.Path) -> tuple[dict[str, str], set[str]]:
-    """(isim -> path, kullanilan path'ler)"""
-    by_name: dict[str, str] = {}
-    paths: set[str] = set()
+def load_base(manifests: pathlib.Path) -> tuple[dict[str, list[str]], dict[str, str]]:
+    """(isim -> path listesi, path -> isim)
 
-    def walk(root: ET.Element) -> None:
+    ONEMLI: sadece default.xml'in kendi <include> zinciri izlenir.
+    snippets/ dizinindeki dosyalarin hepsi base manifestin parcasi DEGIL -
+    cihaz manifesti onlari include eder. Heppsini saymak, include
+    edilmemis bir proje icin extend-project uretir ve repo
+    "extend-project element specifies non-existent project" ile durur.
+    """
+    name_paths: dict[str, list[str]] = {}
+    path_name: dict[str, str] = {}
+
+    def walk(root: ET.Element, seen: set[pathlib.Path]) -> None:
         for e in root.findall("project"):
             n, p = e.get("name"), e.get("path")
-            if n:
-                by_name.setdefault(n, p or "")
-            if p:
-                paths.add(p)
+            if not n:
+                continue
+            lst = name_paths.setdefault(n, [])
+            if p and p not in lst:
+                lst.append(p)
+            if p and p not in path_name:
+                path_name[p] = n
         for inc in root.findall("include"):
-            f = manifests / (inc.get("name") or "")
-            if f.is_file():
-                walk(ET.parse(f).getroot())
+            f = (manifests / (inc.get("name") or "")).resolve()
+            if f.is_file() and f not in seen:
+                seen.add(f)
+                try:
+                    walk(ET.parse(f).getroot(), seen)
+                except ET.ParseError:
+                    continue
 
-    # default.xml + tum snippet'lar (recursive) - snippet'lar alt dizindedir
-    files = sorted(manifests.glob("*.xml")) + sorted(manifests.glob("snippets/*.xml"))
-    for f in files:
-        try:
-            walk(ET.parse(f).getroot())
-        except ET.ParseError:
-            continue
-    return by_name, paths
+    default = manifests / "default.xml"
+    if default.is_file():
+        walk(ET.parse(default).getroot(), {default.resolve()})
+    return name_paths, path_name
 
 
 def main() -> int:
@@ -83,25 +93,10 @@ def main() -> int:
     pinned = ET.parse(build / "evox-manifest-pinned.xml").getroot()
     lm = ET.parse(build / "local_manifests.xml").getroot()
 
-    base_by_name, base_paths = load_base(manifests)
     # isim -> yol listesi (ayni isim birden fazla yolda olabilir:
     # LineageOS/android_hardware_qcom_display sm8450-6.6 ve sm8750'de)
-    name_paths: dict[str, list[str]] = {}
-    path_name: dict[str, str] = {}
-    for f in sorted(manifests.glob("*.xml")) + sorted(manifests.glob("snippets/*.xml")):
-        try:
-            root = ET.parse(f).getroot()
-        except ET.ParseError:
-            continue
-        for e in root.findall("project"):
-            n, pa = e.get("name"), e.get("path")
-            if not n or not pa:
-                continue
-            lst = name_paths.setdefault(n, [])
-            if pa not in lst:
-                lst.append(pa)
-            path_name.setdefault(pa, n)
-    print(f"base: {len(base_by_name)} proje, {len(base_paths)} path, {len(name_paths)} isim")
+    name_paths, path_name = load_base(manifests)
+    print(f"base: {len(name_paths)} isim, {len(path_name)} path")
 
     lines = [
         '<?xml version="1.0" encoding="utf-8"?>',
@@ -146,11 +141,15 @@ def main() -> int:
             ext += 1
         elif path in path_name:
             # Ayni yolda ama FARKLI depo/isim (orn. AOSPA fork).
-            # extend-project isimle calisir ve isim depoyu belirler, bu
-            # yuzden AOSPA'nin SHA'si LineageOS deposunda yok. Bu proje
-            # base haliyle birakilir (gelistirme araci, build icin onemsiz).
+            #
+            # extend-project isimle calisir ve isim depoyu belirler: base'deki
+            # LineageOS projesini fork'un remote/dest-branch'i ile extend
+            # edersek fetch "couldn't find remote ref" ile patlar (LineageOS
+            # deposunda 'beryl' dali yok). Fork'un SHA'si da orijinal depoda
+            # bulunmaz. Bu yuzden proje pinlenmez, base haliyle birakilir.
             skipped += 1
         else:
+            # Yeni proje: base'de hic yok, path da cakismiyor.
             lines += ser(e)
             newp += 1
     lines += ["</manifest>"]
