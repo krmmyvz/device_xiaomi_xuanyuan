@@ -43,8 +43,8 @@ err() { printf '[✗] %s\n' "$*" >&2; }
 
 [ -f "$TARGET" ] || { err "bulunamadi: $TARGET"; exit 1; }
 
-if ! grep -q '"vendor.qti.hardware.display.color-V1-ndk"' "$TARGET"; then
-  ok "V1 referansi zaten yok"
+if ! grep -q '"vendor.qti.hardware.display.color-V2-ndk"' "$TARGET"; then
+  ok "V2 referansi yok, degisiklik gerekmiyor"
   exit 0
 fi
 
@@ -52,16 +52,16 @@ python3 - "$TARGET" <<'PY'
 import re, sys
 p = sys.argv[1]
 s = open(p).read()
-n = s.count('"vendor.qti.hardware.display.color-V1-ndk"')
-s = s.replace('"vendor.qti.hardware.display.color-V1-ndk"',
-              '"vendor.qti.hardware.display.color-V2-ndk"')
+n = s.count('"vendor.qti.hardware.display.color-V2-ndk"')
+s = s.replace('"vendor.qti.hardware.display.color-V2-ndk"',
+              '"vendor.qti.hardware.display.color-V1-ndk"')
 open(p, "w").write(s)
-print("[+] %d referans V1 -> V2 cevrildi" % n)
+print("[+] %d referans V2 -> V1 geri alindi" % n)
 PY
 
-if grep -q '"vendor.qti.hardware.display.color-V1-ndk"' "$TARGET"; then
-  err "V1 referansi kaldi"
+if grep -q '"vendor.qti.hardware.display.color-V2-ndk"' "$TARGET"; then
+  err "V2 referansi kaldi"
   exit 1
 fi
-ok "dogrulama: V1 referansi yok"
+ok "dogrulama: V1 referanslari yerinde"
 log "tamamlandi"

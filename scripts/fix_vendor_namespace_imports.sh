@@ -5,25 +5,31 @@
 # -----
 # vendor/xiaomi/xuanyuan/Android.bp (Xiaomi'nin public vendor reposundan)
 # soong_namespace blogunda yalnizca "hardware/xiaomi" import'u var. Bu
-# namespace'in okudugu modullerin bir kismi ise hardware/qcom-caf altindaki
-# projelerde tanimli, ve o projeler kendi namespace'lerinde:
+# namespace'in okudugu modullerin bir kismi ise baska projelerde
+# tanimli ve o projeler kendi namespace'lerinde:
 #
-#   error: vendor/xiaomi/xuanyuan/Android.bp:3523:1: "libagmclient" depends
-#          on undefined module "vendor.qti.hardware.agm-V1-ndk".
+#   error: "libagmclient" depends on undefined module
+#          "vendor.qti.hardware.agm-V1-ndk".
 #   Module "libagmclient" is defined in namespace
 #   "vendor/xiaomi/xuanyuan" which can read these 3 namespaces:
 #   ["vendor/xiaomi/xuanyuan" "hardware/xiaomi" "."]
-#   Module "vendor.qti.hardware.agm-V1-ndk" can be found in these namespaces:
-#   ["hardware/qcom-caf/sm8450-6.6" "hardware/qcom-caf/sm8750"]
+#   Module "vendor.qti.hardware.agm-V1-ndk" can be found in these
+#   namespaces: ["hardware/qcom-caf/sm8450-6.6" "hardware/qcom-caf/sm8750"]
 #
-# Yani vendor agacinin "hardware/qcom-caf/sm8750" namespace'ini GORMESI
-# gerekiyor.
+# Ayni sekilde display arayuzleri de gorunmez:
+#
+#   error: "ppd" depends on undefined module
+#          "vendor.qti.hardware.display.color-V1-ndk".
+#   Module "vendor.qti.hardware.display.color-V1-ndk" can be found in
+#   these namespaces: ["vendor/qcom/opensource/commonsys-intf/display"]
 #
 # COZUM
 # -----
-# soong_namespace imports listesine "hardware/qcom-caf/sm8750" eklenir.
-# Bu namespace sm8750 SoC'sunun HAL'larini toplar; vendor blob'larinin
-# cogu (agm, qspmhal, adreno profiller) oradan gelir.
+# soong_namespace imports listesine iki namespace eklenir:
+#   - hardware/qcom-caf/sm8750 : sm8750 SoC'sunun HAL'lari (agm, qspmhal,
+#     adreno profiller gibi blob'larin cogu buradan gelir)
+#   - vendor/qcom/opensource/commonsys-intf/display : Qualcomm display
+#     arayuzleri (color, postproc)
 #
 # Idempotenttir.
 set -uo pipefail
@@ -31,37 +37,52 @@ set -uo pipefail
 AOSP="${AOSP_ROOT:-/mnt/src}"
 TARGET="$AOSP/vendor/xiaomi/xuanyuan/Android.bp"
 
+IMPORTS=(
+  "hardware/qcom-caf/sm8750"
+  "vendor/qcom/opensource/commonsys-intf/display"
+)
+
 log() { printf '[+] %s\n' "$*"; }
 ok()  { printf '[✓] %s\n' "$*"; }
 err() { printf '[✗] %s\n' "$*" >&2; }
 
 [ -f "$TARGET" ] || { err "bulunamadi: $TARGET"; exit 1; }
 
-if grep -q '"hardware/qcom-caf/sm8750"' "$TARGET"; then
-  ok "import zaten var"
-  exit 0
-fi
-
-python3 - "$TARGET" <<'PY'
+python3 - "$TARGET" "${IMPORTS[@]}" <<'PY'
 import re, sys
 p = sys.argv[1]
+imports = sys.argv[2:]
 s = open(p).read()
+
 m = re.search(r'(soong_namespace \{\s*\n\s*imports: \[\s*\n)(.*?)(\s*\],)', s, re.S)
 if not m:
     raise SystemExit("soong_namespace imports blogu bulunamadi")
-body = m.group(2)
-new_body = body.rstrip()
-if not new_body.endswith(","):
-    new_body += ","
-new_body += '\n        "hardware/qcom-caf/sm8750",'
-s = s[:m.start(2)] + new_body + s[m.end(2):]
-open(p, "w").write(s)
-print('[+] "hardware/qcom-caf/sm8750" import eklendi')
+
+body = m.group(2).rstrip()
+existing = set(re.findall(r'"([^"]+)"', body))
+added = []
+for name in imports:
+    if name in existing:
+        continue
+    if body and not body.endswith(","):
+        body += ","
+    body += '\n        "%s",' % name
+    added.append(name)
+
+if added:
+    s = s[:m.start(2)] + body + s[m.end(2):]
+    open(p, "w").write(s)
+    for a in added:
+        print('[+] import eklendi: ' + a)
+else:
+    print("[✓] eklenecek import yok")
 PY
 
-if ! grep -q '"hardware/qcom-caf/sm8750"' "$TARGET"; then
-  err "import eklenemedi"
-  exit 1
-fi
-ok "dogrulama: import var"
+for name in "${IMPORTS[@]}"; do
+  if ! grep -q "\"$name\"" "$TARGET"; then
+    err "import eksik: $name"
+    exit 1
+  fi
+done
+ok "dogrulama: tum import'lar mevcut"
 log "tamamlandi"
