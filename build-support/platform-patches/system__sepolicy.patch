@@ -1,0 +1,429 @@
+diff --git a/Android.bp b/Android.bp
+index 3eb06b8..ca64338 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -403,7 +403,7 @@ se_versioned_policy {
+ // plat_pub_versioned.cil - the exported platform policy associated with the version
+ // that non-platform policy targets.
+ se_versioned_policy {
+-    name: "plat_pub_versioned.cil",
++    name: "plat_pub_versioned.cil.aosp",
+     base: ":pub_policy.cil",
+     target_policy: ":pub_policy.cil",
+     version: "vendor",
+@@ -437,7 +437,7 @@ se_policy_cil {
+ }
+ 
+ se_versioned_policy {
+-    name: "vendor_sepolicy.cil",
++    name: "vendor_sepolicy.cil.aosp",
+     base: ":pub_policy.cil",
+     target_policy: ":vendor_sepolicy.cil.raw",
+     version: "vendor",
+@@ -483,7 +483,7 @@ se_policy_cil {
+ }
+ 
+ se_versioned_policy {
+-    name: "odm_sepolicy.cil",
++    name: "odm_sepolicy.cil.aosp",
+     base: ":pub_policy.cil",
+     target_policy: ":odm_sepolicy.cil.raw",
+     version: "vendor",
+@@ -565,7 +565,7 @@ prebuilt_etc {
+ }
+ 
+ sepolicy_vers {
+-    name: "plat_sepolicy_vers.txt",
++    name: "plat_sepolicy_vers.txt.aosp",
+     version: "vendor",
+     vendor: true,
+ }
+@@ -1421,3 +1421,132 @@ prebuilt_etc {
+     name: "file_contexts.bin",
+     src: ":file_contexts_bin_gen",
+ }
++
++// xuanyuan: vendor/odm policy comes from the stock device policy.
++// The AOSP-built modules are kept as <name>.aosp.
++
++se_prebuilt {
++    name: "plat_pub_versioned.cil",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_plat_pub_versioned_cil",
++    stem: "plat_pub_versioned.cil",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "vendor_sepolicy.cil",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_sepolicy_cil",
++    stem: "vendor_sepolicy.cil",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "plat_sepolicy_vers.txt",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_plat_sepolicy_vers_txt",
++    stem: "plat_sepolicy_vers.txt",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "odm_sepolicy.cil",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_odm_sepolicy_cil",
++    stem: "odm_sepolicy.cil",
++    device_specific: true,
++}
++
++se_prebuilt {
++    name: "vendor_file_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_file_contexts",
++    stem: "vendor_file_contexts",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "vendor_hwservice_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_hwservice_contexts",
++    stem: "vendor_hwservice_contexts",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "vendor_property_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_property_contexts",
++    stem: "vendor_property_contexts",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "vendor_service_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_service_contexts",
++    stem: "vendor_service_contexts",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "vendor_keystore2_key_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_keystore2_key_contexts",
++    stem: "vendor_keystore2_key_contexts",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "vendor_seapp_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_seapp_contexts",
++    stem: "vendor_seapp_contexts",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "vndservice_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vndservice_contexts",
++    stem: "vndservice_contexts",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "odm_file_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_odm_file_contexts",
++    stem: "odm_file_contexts",
++    device_specific: true,
++}
++
++se_prebuilt {
++    name: "odm_hwservice_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_odm_hwservice_contexts",
++    stem: "odm_hwservice_contexts",
++    device_specific: true,
++}
++
++se_prebuilt {
++    name: "odm_property_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_odm_property_contexts",
++    stem: "odm_property_contexts",
++    device_specific: true,
++}
++
++se_prebuilt {
++    name: "odm_service_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_odm_service_contexts",
++    stem: "odm_service_contexts",
++    device_specific: true,
++}
++
++se_prebuilt {
++    name: "odm_seapp_contexts",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_odm_seapp_contexts",
++    stem: "odm_seapp_contexts",
++    device_specific: true,
++}
++
++se_prebuilt {
++    name: "vendor_mac_permissions.xml",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_vendor_mac_permissions_xml",
++    stem: "vendor_mac_permissions.xml",
++    vendor: true,
++}
++
++se_prebuilt {
++    name: "odm_mac_permissions.xml",
++    src: "//vendor/xiaomi/xuanyuan:xuanyuan_stock_odm_mac_permissions_xml",
++    stem: "odm_mac_permissions.xml",
++    device_specific: true,
++}
+diff --git a/build/soong/Android.bp b/build/soong/Android.bp
+index f9c08dd..7a0f2ea 100644
+--- a/build/soong/Android.bp
++++ b/build/soong/Android.bp
+@@ -39,6 +39,7 @@ bootstrap_go_package {
+         "flags.go",
+         "mac_permissions.go",
+         "policy.go",
++        "prebuilt.go",
+         "selinux.go",
+         "selinux_contexts.go",
+         "sepolicy_freeze.go",
+diff --git a/build/soong/prebuilt.go b/build/soong/prebuilt.go
+new file mode 100644
+index 0000000..cbfc9b1
+--- /dev/null
++++ b/build/soong/prebuilt.go
+@@ -0,0 +1,80 @@
++// Copyright (C) 2026 The Android Open Source Project
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//      http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++package selinux
++
++import (
++	"github.com/google/blueprint/proptools"
++
++	"android/soong/android"
++)
++
++func init() {
++	android.RegisterModuleType("se_prebuilt", sePrebuiltFactory)
++}
++
++type sePrebuiltProperties struct {
++	// Prebuilt policy or contexts file installed as-is into etc/selinux.
++	Src *string `android:"path"`
++
++	// Name of the installed file. Default is {module_name}.
++	Stem *string
++}
++
++// se_prebuilt installs an already-compiled policy file (e.g. a device's stock
++// vendor_sepolicy.cil or vendor_file_contexts) in place of the one the build
++// would generate. Like the other selinux modules it is arch-common, so it can
++// be referenced from them.
++type sePrebuilt struct {
++	android.ModuleBase
++
++	properties    sePrebuiltProperties
++	installSource android.Path
++	installPath   android.InstallPath
++}
++
++func sePrebuiltFactory() android.Module {
++	m := &sePrebuilt{}
++	m.AddProperties(&m.properties)
++	android.InitAndroidArchModule(m, android.DeviceSupported, android.MultilibCommon)
++	return m
++}
++
++func (m *sePrebuilt) stem() string {
++	return proptools.StringDefault(m.properties.Stem, m.Name())
++}
++
++func (m *sePrebuilt) GenerateAndroidBuildActions(ctx android.ModuleContext) {
++	if proptools.String(m.properties.Src) == "" {
++		ctx.PropertyErrorf("src", "must be specified")
++		return
++	}
++	m.installSource = android.PathForModuleSrc(ctx, *m.properties.Src)
++	m.installPath = android.PathForModuleInstall(ctx, "etc", "selinux")
++	ctx.InstallFile(m.installPath, m.stem(), m.installSource)
++	ctx.SetOutputFiles(android.Paths{m.installSource}, "")
++}
++
++func (m *sePrebuilt) AndroidMkEntries() []android.AndroidMkEntries {
++	return []android.AndroidMkEntries{android.AndroidMkEntries{
++		OutputFile: android.OptionalPathForPath(m.installSource),
++		Class:      "ETC",
++		ExtraEntries: []android.AndroidMkExtraEntriesFunc{
++			func(ctx android.AndroidMkExtraEntriesContext, entries *android.AndroidMkEntries) {
++				entries.SetPath("LOCAL_MODULE_PATH", m.installPath)
++				entries.SetString("LOCAL_INSTALLED_MODULE_STEM", m.stem())
++			},
++		},
++	}}
++}
+diff --git a/compat/Android.bp b/compat/Android.bp
+index be895d9..1a8935b 100644
+--- a/compat/Android.bp
++++ b/compat/Android.bp
+@@ -592,6 +592,12 @@ se_compat_cil {
+     version: "202404",
+ }
+ 
++prebuilt_etc {
++    name: "plat_sepolicy_genfs_202404.cil",
++    src: "plat_sepolicy_genfs_202404.cil",
++    relative_install_path: "selinux",
++}
++
+ prebuilt_etc {
+     name: "plat_sepolicy_genfs_202504.cil",
+     src: "plat_sepolicy_genfs_202504.cil",
+diff --git a/compat/plat_sepolicy_genfs_202404.cil b/compat/plat_sepolicy_genfs_202404.cil
+new file mode 100644
+index 0000000..e8c3f68
+--- /dev/null
++++ b/compat/plat_sepolicy_genfs_202404.cil
+@@ -0,0 +1 @@
++;; Android 15 (202404) vendors predate genfs label updates: no extra rules.
+diff --git a/contexts/Android.bp b/contexts/Android.bp
+index dcaf3b4..81f77e5 100644
+--- a/contexts/Android.bp
++++ b/contexts/Android.bp
+@@ -109,7 +109,7 @@ file_contexts {
+ }
+ 
+ file_contexts {
+-    name: "vendor_file_contexts",
++    name: "vendor_file_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":file_contexts_files{.plat_vendor}",
+@@ -162,7 +162,7 @@ file_contexts {
+ }
+ 
+ file_contexts {
+-    name: "odm_file_contexts",
++    name: "odm_file_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [":file_contexts_files{.odm}"],
+     device_specific: true,
+@@ -199,7 +199,7 @@ hwservice_contexts {
+ }
+ 
+ hwservice_contexts {
+-    name: "vendor_hwservice_contexts",
++    name: "vendor_hwservice_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":hwservice_contexts_files{.plat_vendor}",
+@@ -210,7 +210,7 @@ hwservice_contexts {
+ }
+ 
+ hwservice_contexts {
+-    name: "odm_hwservice_contexts",
++    name: "odm_hwservice_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [":hwservice_contexts_files{.odm}"],
+     device_specific: true,
+@@ -273,7 +273,7 @@ property_contexts {
+ }
+ 
+ property_contexts {
+-    name: "vendor_property_contexts",
++    name: "vendor_property_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":property_contexts_files{.plat_vendor}",
+@@ -296,7 +296,7 @@ property_contexts {
+ }
+ 
+ property_contexts {
+-    name: "odm_property_contexts",
++    name: "odm_property_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [":property_contexts_files{.odm}"],
+     device_specific: true,
+@@ -355,7 +355,7 @@ service_contexts {
+ }
+ 
+ service_contexts {
+-    name: "vendor_service_contexts",
++    name: "vendor_service_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":service_contexts_files{.plat_vendor}",
+@@ -378,7 +378,7 @@ service_contexts {
+ }
+ 
+ service_contexts {
+-    name: "odm_service_contexts",
++    name: "odm_service_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":service_contexts_files{.odm}",
+@@ -420,7 +420,7 @@ keystore2_key_contexts {
+ }
+ 
+ keystore2_key_contexts {
+-    name: "vendor_keystore2_key_contexts",
++    name: "vendor_keystore2_key_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":keystore2_key_contexts_files{.plat_vendor}",
+@@ -469,7 +469,7 @@ seapp_contexts {
+ }
+ 
+ seapp_contexts {
+-    name: "vendor_seapp_contexts",
++    name: "vendor_seapp_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":seapp_contexts_files{.plat_vendor}",
+@@ -486,7 +486,7 @@ seapp_contexts {
+ }
+ 
+ seapp_contexts {
+-    name: "odm_seapp_contexts",
++    name: "odm_seapp_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":seapp_contexts_files{.odm}",
+@@ -501,7 +501,7 @@ seapp_contexts {
+ }
+ 
+ vndservice_contexts {
+-    name: "vndservice_contexts",
++    name: "vndservice_contexts.aosp",
+     defaults: ["contexts_flags_defaults"],
+     srcs: [
+         ":vndservice_contexts_files{.plat_vendor}",
+diff --git a/mac_permissions/Android.bp b/mac_permissions/Android.bp
+index 16132c6..94b5d8a 100644
+--- a/mac_permissions/Android.bp
++++ b/mac_permissions/Android.bp
+@@ -70,7 +70,7 @@ mac_permissions {
+ }
+ 
+ mac_permissions {
+-    name: "vendor_mac_permissions.xml",
++    name: "vendor_mac_permissions.xml.aosp",
+     keys: [
+         ":keys.conf{.plat_vendor}",
+         ":keys.conf{.vendor}",
+@@ -85,7 +85,7 @@ mac_permissions {
+ }
+ 
+ mac_permissions {
+-    name: "odm_mac_permissions.xml",
++    name: "odm_mac_permissions.xml.aosp",
+     keys: [
+         ":keys.conf{.odm}",
+         ":keys.conf{.reqd_mask}",

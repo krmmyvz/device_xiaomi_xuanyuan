@@ -1,5 +1,5 @@
 diff --git a/audio/aidl/default/Android.bp b/audio/aidl/default/Android.bp
-index 48c1fefcf5..1a7836449f 100644
+index 48c1fef..1a78364 100644
 --- a/audio/aidl/default/Android.bp
 +++ b/audio/aidl/default/Android.bp
 @@ -42,6 +42,7 @@ cc_defaults {
@@ -11,7 +11,7 @@ index 48c1fefcf5..1a7836449f 100644
          "aidlaudioservice_defaults",
          "latest_android_media_audio_common_types_ndk_shared",
 diff --git a/bluetooth/audio/utils/Android.bp b/bluetooth/audio/utils/Android.bp
-index 4e247606db..4689a13be4 100644
+index 4e24760..4689a13 100644
 --- a/bluetooth/audio/utils/Android.bp
 +++ b/bluetooth/audio/utils/Android.bp
 @@ -7,6 +7,13 @@ package {
@@ -29,7 +29,7 @@ index 4e247606db..4689a13be4 100644
      name: "libbluetooth_audio_session",
      defaults: ["hidl_defaults"],
 diff --git a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp
-index 7fe1562f29..47c33f382a 100644
+index 7fe1562..47c33f3 100644
 --- a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp
 +++ b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.cpp
 @@ -385,6 +385,11 @@ void BluetoothAudioSession::ReportAudioConfigChanged(
@@ -45,7 +45,7 @@ index 7fe1562f29..47c33f382a 100644
    std::lock_guard<std::recursive_mutex> guard(mutex_);
  
 diff --git a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h
-index 023fc4d249..6cd2473c4e 100644
+index 023fc4d..6cd2473 100644
 --- a/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h
 +++ b/bluetooth/audio/utils/aidl_session/BluetoothAudioSession.h
 @@ -117,6 +117,8 @@ class BluetoothAudioSession {
@@ -57,8 +57,21 @@ index 023fc4d249..6cd2473c4e 100644
    bool IsSessionReady(bool is_primary_hal);
  
    /***
+diff --git a/camera/device/aidl/Android.bp b/camera/device/aidl/Android.bp
+index f60f980..ad497de 100644
+--- a/camera/device/aidl/Android.bp
++++ b/camera/device/aidl/Android.bp
+@@ -53,7 +53,7 @@ aidl_interface {
+                 "android.hardware.common-V2",
+                 "android.hardware.common.fmq-V1",
+                 "android.hardware.camera.common-V1",
+-                "android.hardware.camera.metadata-V2",
++                "android.hardware.camera.metadata-V3",
+                 "android.hardware.graphics.common-V7",
+             ],
+         },
 diff --git a/sensors/aidl/multihal/Android.bp b/sensors/aidl/multihal/Android.bp
-index ef8fa05291..3723a8b7d2 100644
+index ef8fa05..3723a8b 100644
 --- a/sensors/aidl/multihal/Android.bp
 +++ b/sensors/aidl/multihal/Android.bp
 @@ -41,7 +41,7 @@ cc_binary {
@@ -71,7 +84,7 @@ index ef8fa05291..3723a8b7d2 100644
      shared_libs: [
          "android.hardware.sensors@2.0-ScopedWakelock",
 diff --git a/wifi/aidl/default/Android.bp b/wifi/aidl/default/Android.bp
-index eb371c7d92..d66f2d54ef 100644
+index eb371c7..d66f2d5 100644
 --- a/wifi/aidl/default/Android.bp
 +++ b/wifi/aidl/default/Android.bp
 @@ -109,19 +109,29 @@ cc_library_static {
@@ -124,3 +137,16 @@ index eb371c7d92..d66f2d54ef 100644
      cppflags: [
          "-Wall",
          "-Werror",
+diff --git a/wifi/aidl/default/android.hardware.wifi-service-aosp.xml b/wifi/aidl/default/android.hardware.wifi-service-aosp.xml
+new file mode 100644
+index 0000000..9bfffb6
+--- /dev/null
++++ b/wifi/aidl/default/android.hardware.wifi-service-aosp.xml
+@@ -0,0 +1,7 @@
++<manifest version="1.0" type="device">
++	<hal format="aidl">
++		<name>android.hardware.wifi</name>
++		<version>3</version>
++		<fqname>IWifi/default</fqname>
++	</hal>
++</manifest>

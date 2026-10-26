@@ -1,5 +1,5 @@
 diff --git a/core/Makefile b/core/Makefile
-index aecbdf5ba8..d055e367ce 100644
+index aecbdf5..d055e36 100644
 --- a/core/Makefile
 +++ b/core/Makefile
 @@ -1054,7 +1054,10 @@ endif
@@ -14,3 +14,48 @@ index aecbdf5ba8..d055e367ce 100644
  $(INSTALLED_DTBOIMAGE_TARGET): $(BOARD_PREBUILT_DTBOIMAGE) $(AVBTOOL) $(BOARD_AVB_DTBO_KEY_PATH)
  	cp $(BOARD_PREBUILT_DTBOIMAGE) $@
  	chmod +w $@
+diff --git a/core/config.mk b/core/config.mk
+index 8d308fe..798c3d7 100644
+--- a/core/config.mk
++++ b/core/config.mk
+@@ -878,7 +878,8 @@ BUILD_DATETIME_FROM_FILE := $$(cat $(BUILD_DATETIME_FILE))
+ # PLATFORM_SEPOLICY_VERSION is a number of the form "YYYYMM" with "YYYYMM"
+ # mapping to vFRC version.
+ PLATFORM_SEPOLICY_VERSION := $(BOARD_API_LEVEL)
+-BOARD_SEPOLICY_VERS := $(PLATFORM_SEPOLICY_VERSION)
++# xuanyuan: stock vendor sepolicy is older than the platform (mixed build).
++BOARD_SEPOLICY_VERS := $(if $(BOARD_SEPOLICY_VERS_OVERRIDE),$(BOARD_SEPOLICY_VERS_OVERRIDE),$(PLATFORM_SEPOLICY_VERSION))
+ .KATI_READONLY := PLATFORM_SEPOLICY_VERSION BOARD_SEPOLICY_VERS
+ 
+ # A list of SEPolicy versions, besides PLATFORM_SEPOLICY_VERSION, that the framework supports.
+@@ -900,9 +901,12 @@ PLATFORM_SEPOLICY_COMPAT_VERSIONS += $(foreach ver,\
+     PLATFORM_SEPOLICY_VERSION \
+ 
+ BOARD_GENFS_LABELS_VERSION ?= $(BOARD_API_LEVEL)
++# xuanyuan: stock (202404) vendor policy may keep the older genfs labels.
++ifeq ($(BOARD_GENFS_LABELS_VERSION_ALLOW_OLDER),)
+ ifeq ($(call math_gt,$(BOARD_API_LEVEL),$(BOARD_GENFS_LABELS_VERSION)),true)
+   $(error BOARD_GENFS_LABELS_VERSION ($(BOARD_GENFS_LABELS_VERSION)) must be greater than or equal to BOARD_API_LEVEL ($(BOARD_API_LEVEL)))
+ endif
++endif
+ 
+ ifeq ($(PRODUCT_RETROFIT_DYNAMIC_PARTITIONS),true)
+   ifneq ($(PRODUCT_USE_DYNAMIC_PARTITIONS),true)
+diff --git a/tools/releasetools/common.py b/tools/releasetools/common.py
+index 47ab9e7..f14b0c2 100644
+--- a/tools/releasetools/common.py
++++ b/tools/releasetools/common.py
+@@ -1105,8 +1105,11 @@ class PartitionBuildProps(object):
+     """
+     data = ''
+     partition_map = PartitionMapFromTargetFiles(input_file)
+-    for prop_file in ['{}/etc/build.prop'.format(partition_map[name]),
+-                      '{}/build.prop'.format(partition_map[name])]:
++    # Prebuilt partition images (e.g. BOARD_PREBUILT_VENDOR_DLKMIMAGE) have no
++    # extracted directory in target files; fall back to the conventional name.
++    subdir = partition_map.get(name, name.upper())
++    for prop_file in ['{}/etc/build.prop'.format(subdir),
++                      '{}/build.prop'.format(subdir)]:
+       try:
+         data = ReadFromInputFile(input_file, prop_file)
+         break

@@ -1,3 +1,17 @@
+diff --git a/etc/Android.bp b/etc/Android.bp
+index 940391b..39d4a50 100644
+--- a/etc/Android.bp
++++ b/etc/Android.bp
+@@ -16,7 +16,8 @@ prebuilt_etc {
+ }
+ 
+ sh_binary {
+-    name: "init.qcom.usb.sh",
++    name: "init.qcom.usb.sh-xuanyuan",
++    filename: "init.qcom.usb.sh",
+     src: "init.qcom.usb.sh",
+     vendor: true,
+ }
 diff --git a/hal/Android.bp b/hal/Android.bp
 index e4e3dcf..504de24 100644
 --- a/hal/Android.bp
@@ -55,3 +69,16 @@ index 911be35..b4f861a 100644
                names.find(entry);
            if (portName == names.end()) {
              names.insert({entry, false});
+diff --git a/vendor_product.mk b/vendor_product.mk
+index 1f78955..c2a915d 100644
+--- a/vendor_product.mk
++++ b/vendor_product.mk
+@@ -60,7 +60,7 @@ endif
+ ifeq ($(USB_USES_QMAA),true)
+   PRODUCT_PACKAGES += init.qti.usb.qmaa.rc
+ else
+-  PRODUCT_PACKAGES += init.qcom.usb.rc init.qcom.usb.sh
++  PRODUCT_PACKAGES += init.qcom.usb.rc init.qcom.usb.sh-xuanyuan
+ 
+   #
+   # USB Gadget HAL is enabled on newer targets and takes the place

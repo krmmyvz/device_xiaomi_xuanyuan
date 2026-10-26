@@ -1,5 +1,5 @@
 diff --git a/camera/ndk/Android.bp b/camera/ndk/Android.bp
-index 7ae825e6a6..613d0dc490 100644
+index 7ae825e..613d0dc 100644
 --- a/camera/ndk/Android.bp
 +++ b/camera/ndk/Android.bp
 @@ -119,6 +119,9 @@ cc_library_shared {
@@ -13,7 +13,7 @@ index 7ae825e6a6..613d0dc490 100644
      srcs: [
          "NdkCameraCaptureSession.cpp",
 diff --git a/media/audioaidlconversion/Android.bp b/media/audioaidlconversion/Android.bp
-index 249b18c528..bdf261f413 100644
+index 249b18c..bdf261f 100644
 --- a/media/audioaidlconversion/Android.bp
 +++ b/media/audioaidlconversion/Android.bp
 @@ -132,6 +132,41 @@ cc_library {
@@ -59,7 +59,7 @@ index 249b18c528..bdf261f413 100644
          "AidlConversionCppNdk.cpp",
          "AidlConversionNdk.cpp",
 diff --git a/media/codec2/hal/aidl/Android.bp b/media/codec2/hal/aidl/Android.bp
-index e294a316c8..839eb84f4f 100644
+index e294a31..839eb84 100644
 --- a/media/codec2/hal/aidl/Android.bp
 +++ b/media/codec2/hal/aidl/Android.bp
 @@ -82,6 +82,7 @@ cc_library {
@@ -79,7 +79,7 @@ index e294a316c8..839eb84f4f 100644
      ],
  
 diff --git a/media/codec2/hal/hidl/1.0/utils/Android.bp b/media/codec2/hal/hidl/1.0/utils/Android.bp
-index ba269ba97d..047f2455f6 100644
+index ba269ba..047f245 100644
 --- a/media/codec2/hal/hidl/1.0/utils/Android.bp
 +++ b/media/codec2/hal/hidl/1.0/utils/Android.bp
 @@ -76,6 +76,7 @@ cc_library {
@@ -91,7 +91,7 @@ index ba269ba97d..047f2455f6 100644
          "libsystem_headers",
      ],
 diff --git a/media/codec2/hal/hidl/1.1/utils/Android.bp b/media/codec2/hal/hidl/1.1/utils/Android.bp
-index c5d16731bd..f82d531127 100644
+index c5d1673..f82d531 100644
 --- a/media/codec2/hal/hidl/1.1/utils/Android.bp
 +++ b/media/codec2/hal/hidl/1.1/utils/Android.bp
 @@ -78,6 +78,7 @@ cc_library {
@@ -103,7 +103,7 @@ index c5d16731bd..f82d531127 100644
          "libcodec2_internal", // private
      ],
 diff --git a/media/codec2/hal/hidl/1.2/utils/Android.bp b/media/codec2/hal/hidl/1.2/utils/Android.bp
-index 2cd58f7acd..37e42efb2a 100644
+index 2cd58f7..37e42ef 100644
 --- a/media/codec2/hal/hidl/1.2/utils/Android.bp
 +++ b/media/codec2/hal/hidl/1.2/utils/Android.bp
 @@ -83,6 +83,7 @@ cc_library {
@@ -115,7 +115,7 @@ index 2cd58f7acd..37e42efb2a 100644
          "libcodec2_internal", // private
      ],
 diff --git a/media/codec2/hal/plugin/Android.bp b/media/codec2/hal/plugin/Android.bp
-index 873bb028ce..b066ff5796 100644
+index 873bb02..b066ff5 100644
 --- a/media/codec2/hal/plugin/Android.bp
 +++ b/media/codec2/hal/plugin/Android.bp
 @@ -10,8 +10,15 @@ package {
@@ -135,7 +135,7 @@ index 873bb028ce..b066ff5796 100644
  }
  
 diff --git a/media/libaudiohal/impl/Hal2AidlMapper.cpp b/media/libaudiohal/impl/Hal2AidlMapper.cpp
-index 0f3863b613..569007b67a 100644
+index 0f3863b..569007b 100644
 --- a/media/libaudiohal/impl/Hal2AidlMapper.cpp
 +++ b/media/libaudiohal/impl/Hal2AidlMapper.cpp
 @@ -638,7 +638,14 @@ Hal2AidlMapper::Ports::iterator Hal2AidlMapper::findPort(
@@ -155,7 +155,7 @@ index 0f3863b613..569007b67a 100644
      auto flagMatches = [&flags, &optionalFlags](const AudioIoFlags& portFlags) {
          // Ports should be able to match if the optional flags are not requested.
 diff --git a/media/libeffects/downmix/Android.bp b/media/libeffects/downmix/Android.bp
-index 19b80829f2..2a36a1f63f 100644
+index 19b8082..2a36a1f 100644
 --- a/media/libeffects/downmix/Android.bp
 +++ b/media/libeffects/downmix/Android.bp
 @@ -51,6 +51,7 @@ cc_library {
@@ -167,7 +167,7 @@ index 19b80829f2..2a36a1f63f 100644
          ":effectCommonFile",
          "aidl/DownmixContext.cpp",
 diff --git a/media/libeffects/dynamicsproc/Android.bp b/media/libeffects/dynamicsproc/Android.bp
-index 12477a49b8..ba0cee8155 100644
+index 12477a4..ba0cee8 100644
 --- a/media/libeffects/dynamicsproc/Android.bp
 +++ b/media/libeffects/dynamicsproc/Android.bp
 @@ -78,6 +78,7 @@ cc_library_shared {
@@ -179,7 +179,7 @@ index 12477a49b8..ba0cee8155 100644
      srcs: [
          ":effectCommonFile",
 diff --git a/media/libeffects/loudness/Android.bp b/media/libeffects/loudness/Android.bp
-index 775568ac66..606b7bb565 100644
+index 775568a..606b7bb 100644
 --- a/media/libeffects/loudness/Android.bp
 +++ b/media/libeffects/loudness/Android.bp
 @@ -48,6 +48,7 @@ cc_library {
@@ -191,7 +191,7 @@ index 775568ac66..606b7bb565 100644
          ":effectCommonFile",
          "aidl/EffectLoudnessEnhancer.cpp",
 diff --git a/media/libeffects/lvm/wrapper/Android.bp b/media/libeffects/lvm/wrapper/Android.bp
-index 5b4804556c..faef99dd17 100644
+index 5b48045..faef99d 100644
 --- a/media/libeffects/lvm/wrapper/Android.bp
 +++ b/media/libeffects/lvm/wrapper/Android.bp
 @@ -104,6 +104,7 @@ cc_library {
@@ -211,7 +211,7 @@ index 5b4804556c..faef99dd17 100644
          ":effectCommonFile",
          "Reverb/aidl/EffectReverb.cpp",
 diff --git a/media/libeffects/visualizer/Android.bp b/media/libeffects/visualizer/Android.bp
-index 8f1d8da4e8..4fd3d5e0f4 100644
+index 8f1d8da..4fd3d5e 100644
 --- a/media/libeffects/visualizer/Android.bp
 +++ b/media/libeffects/visualizer/Android.bp
 @@ -53,6 +53,7 @@ cc_library_shared {
@@ -223,7 +223,7 @@ index 8f1d8da4e8..4fd3d5e0f4 100644
          ":effectCommonFile",
          "aidl/Visualizer.cpp",
 diff --git a/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp b/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp
-index 10973417e8..e16a97ea95 100644
+index 1097341..e16a97e 100644
 --- a/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp
 +++ b/services/audiopolicy/common/managerdefinitions/src/AudioPolicyConfig.cpp
 @@ -192,7 +192,12 @@ sp<const AudioPolicyConfig> AudioPolicyConfig::loadFromApmAidlConfigWithFallback
@@ -241,7 +241,7 @@ index 10973417e8..e16a97ea95 100644
  
  // static
 diff --git a/services/audiopolicy/engineconfigurable/src/Engine.cpp b/services/audiopolicy/engineconfigurable/src/Engine.cpp
-index c33ef023f9..e958902d41 100644
+index c33ef02..e958902 100644
 --- a/services/audiopolicy/engineconfigurable/src/Engine.cpp
 +++ b/services/audiopolicy/engineconfigurable/src/Engine.cpp
 @@ -36,7 +36,9 @@
@@ -323,7 +323,7 @@ index c33ef023f9..e958902d41 100644
      (void) aidlConfig;
      ALOGE("%s CapEngine Config disabled, falling back on vendor XML for engine", __func__);
 diff --git a/services/audiopolicy/enginedefault/src/Engine.cpp b/services/audiopolicy/enginedefault/src/Engine.cpp
-index 53cc9eb78c..e34165251b 100644
+index 53cc9eb..e341652 100644
 --- a/services/audiopolicy/enginedefault/src/Engine.cpp
 +++ b/services/audiopolicy/enginedefault/src/Engine.cpp
 @@ -26,6 +26,7 @@
@@ -345,3 +345,16 @@ index 53cc9eb78c..e34165251b 100644
      return loadWithFallback(aidlConfig);
  }
  
+diff --git a/services/camera/virtualcamera/Android.bp b/services/camera/virtualcamera/Android.bp
+index c69d385..666cd81 100644
+--- a/services/camera/virtualcamera/Android.bp
++++ b/services/camera/virtualcamera/Android.bp
+@@ -32,7 +32,7 @@ cc_defaults {
+         "android.hardware.camera.common-V1-ndk",
+         "android.hardware.camera.common@1.0-helper",
+         "android.hardware.camera.device-V2-ndk",
+-        "android.hardware.camera.metadata-V2-ndk",
++        "android.hardware.camera.metadata-V3-ndk",
+         "android.hardware.camera.provider-V2-ndk",
+         "libaidlcommonsupport",
+         "virtual_camera_service_aidl-ndk",
