@@ -222,10 +222,7 @@ PRODUCT_COPY_FILES += \
 
 # Qualcomm telephony shared libraries required by stock qcrilmsgtunnel.
 PRODUCT_COPY_FILES += \
-    vendor/xiaomi/xuanyuan/proprietary/system_ext/framework/qti-telephony-hidl-wrapper.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/qti-telephony-hidl-wrapper.jar \
-    vendor/xiaomi/xuanyuan/proprietary/system_ext/framework/qti-telephony-utils.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/qti-telephony-utils.jar \
-    vendor/xiaomi/xuanyuan/proprietary/system_ext/framework/qcrilhook.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/qcrilhook.jar \
-    vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/permissions/qcrilhook.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/qcrilhook.xml
+    device/xiaomi/xuanyuan/prebuilts/esim/framework/qti-telephony-hidl-wrapper-prd.jar:$(TARGET_COPY_OUT_SYSTEM_EXT)/framework/qti-telephony-hidl-wrapper.jar
 
 # These source-tree permission XMLs are byte-identical to the stock versions.
 PRODUCT_PACKAGES += \
@@ -284,14 +281,11 @@ PRODUCT_PACKAGES += \
     android.hardware.fingerprint.permission-neoteric \
     qti_fingerprint_interface.permission-neoteric
 
-PRODUCT_PACKAGES += \
-    libimsmedia_jni-xuanyuan
 
 # Camera feature declarations from AOSP plus the stock xuanyuan extension list.
 PRODUCT_PACKAGES += \
     libcamxexternalformatutils-vendor-xuanyuan \
-    libui-camera303-xuanyuan \
-    libcamera2ndk_vendor-xuanyuan-runtime
+    libui-camera303-xuanyuan
 
 # Verified stock303 camera graphics namespace, without replacing display's vendor copies.
 PRODUCT_PACKAGES += \
@@ -310,7 +304,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.camera.front.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.front.xml \
     frameworks/native/data/etc/android.hardware.camera.full.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.full.xml \
     frameworks/native/data/etc/android.hardware.camera.raw.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.raw.xml \
-    vendor/xiaomi/xuanyuan/proprietary/vendor/etc/permissions/camera_extensions.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/camera_extensions.xml
+    device/xiaomi/xuanyuan/neoteric_compat/vendor/etc/permissions/camera_extensions.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/camera_extensions.xml
 
 # xuanyuan compatibility symlinks and feature declarations.
 # The source Wi-Fi service is non-installable; retain the stock303 HAL instead
@@ -384,9 +378,9 @@ PRODUCT_COPY_FILES += \
 # eSIM / eUICC support.
 # Keep the stock/QTI runtime pieces already used by xuanyuan, and add the
 # same product-side telephony framework pieces used by Xiaomi's SM8750 tree.
-# OpenEUICC remains the privileged system LPA UI.
+# OpenEUICC and the stock EidService/uimremote* services are left out for now:
+# they do not build against this tree yet.
 PRODUCT_PACKAGES += \
-    OpenEUICC \
     uimlpaservice-xuanyuan \
     uimlpalibrary-xuanyuan \
     libjni_aidl_service-xuanyuan \
@@ -421,8 +415,6 @@ $(call inherit-product, device/xiaomi/xuanyuan/rfs_symlinks/rfs_symlinks.mk)
 PRODUCT_PACKAGES += \
     vibratorfeature-wrapper-neoteric
 
-# Stock Qualcomm eSIM support services used alongside OpenEUICC.
-PRODUCT_PACKAGES +=     EidService     uimremoteclient     uimremoteserver     uimremoteclientlibrary     uimremoteserverlibrary     xuanyuan_uimremoteclient_permission     xuanyuan_uimremoteserver_permission
 # Stock Xiaomi multimedia/Bluetooth codec additions absent from the base ROM.
 PRODUCT_PACKAGES += \
     liblhdc-xuanyuan-stock \
@@ -446,6 +438,8 @@ PRODUCT_PACKAGES += android.frameworks.cameraservice.common-V1-ndk.vendor
 PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.nfc.xml:vendor/etc/permissions/android.hardware.nfc.xml
 
 # Required by mifaced/libcamera2ndk_vendor at runtime.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/libcamera2ndk_vendor.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libcamera2ndk_vendor.so
 PRODUCT_PACKAGES += android.frameworks.cameraservice.device-V2-ndk.vendor
 
 PRODUCT_PACKAGES += android.frameworks.cameraservice.service-V2-ndk.vendor
