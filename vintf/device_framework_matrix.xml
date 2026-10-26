@@ -936,7 +936,7 @@
     </hal>
     <hal format="aidl" optional="true">
         <name>vendor.xiaomi.hardware.videoservice</name>
-        <version>4-7</version>
+        <version>4-11</version>
         <interface>
             <name>IVideoService</name>
             <instance>default</instance>

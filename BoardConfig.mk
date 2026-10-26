@@ -14,6 +14,10 @@ SOONG_CONFIG_XIAOMI_BIOMETRICS_FINGERPRINT_IMPL_VER := V2
 # Stock audio blobs share install paths with AOSP vendor variants. The stock
 # prebuilt rules are emitted last and must provide the vendor image copies.
 BUILD_BROKEN_DUP_RULES := true
+# libcamera2ndk_vendor.so stok blob'u PRODUCT_COPY_FILES ile kuruluyor (Android 16
+# ELF kopyalamayi yasakliyor). Vendor agacinda ayni dosyayi kuran modul
+# 'libcamera2ndk_vendor_vendor' installable:false oldugu icin kopyalama yolu korunuyor.
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
 
 # A/B
 AB_OTA_UPDATER := true
@@ -113,7 +117,7 @@ BOARD_QTI_DYNAMIC_PARTITIONS_PARTITION_LIST := \
     system_ext \
     system_dlkm \
     vendor
-BOARD_QTI_DYNAMIC_PARTITIONS_SIZE := 13417578496
+BOARD_QTI_DYNAMIC_PARTITIONS_SIZE := 13411287040
 BOARD_USES_METADATA_PARTITION := true
 
 # Filesystems
@@ -143,6 +147,12 @@ BOARD_SHIPPING_API_LEVEL := 202404
 # SELinux
 include device/qcom/sepolicy_vndr/sm8750/SEPolicy.mk
 BOARD_VENDOR_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
+# Vendor/odm SELinux policy is the stock OS4.0.0.6 one (vendor/xiaomi/xuanyuan/sepolicy-stock),
+# built for platform sepolicy 202404; see the system/sepolicy xuanyuan patch.
+BOARD_SEPOLICY_VERS_OVERRIDE := 202404
+# Stock vendor policy labels /sys/power/mem_sleep itself; keep pre-202504 genfs labels.
+BOARD_GENFS_LABELS_VERSION := 202404
+BOARD_GENFS_LABELS_VERSION_ALLOW_OLDER := true
 
 # Properties
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
@@ -199,6 +209,9 @@ DEVICE_MANIFEST_KERA_FILES := $(DEVICE_PATH)/vintf/manifest_kera.xml
 DEVICE_MANIFEST_TUNA_FILES := $(DEVICE_PATH)/vintf/manifest_tuna.xml
 
 ODM_MANIFEST_FILES := $(DEVICE_PATH)/vintf/manifest_odm.xml
+
+# Base manifest: provides target-level for the SKU-less VINTF check.
+DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/vintf/manifest.xml
 
 # Wi-Fi VINTF fragment (Android 16 build rules)
 DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/configs/wifi/android.hardware.wifi-service.xml

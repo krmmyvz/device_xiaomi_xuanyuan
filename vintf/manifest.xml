@@ -1,0 +1,7 @@
+<!--
+    Base device manifest. The SKU manifests (sun/kera/tuna) carry the same
+    target-level; checkvintf also validates the SKU-less combination, which
+    fails without a Shipping FCM version.
+-->
+<manifest version="8.0" type="device" target-level="202404">
+</manifest>
