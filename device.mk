@@ -260,6 +260,29 @@ PRODUCT_PACKAGES += \
     libbluetooth_audio_session_aidl \
     libstagefright_foundation-v33
 
+# Stock AIDL NDK libs that no installed module provides but stock vendor blobs
+# link against (audio HAL, camera provider, SPU keymint).
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.audio.core-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.audio.core-V2-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.audio.core.sounddose-V1-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.audio.core.sounddose-V1-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.audio.effect-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.audio.effect-V2-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.camera.metadata-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.camera.metadata-V2-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.security.sharedsecret-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.security.sharedsecret-V2-ndk.so
+
+# Stock camera AIDL NDK libs. The stock camx provider was built against these;
+# the source-built ones link newer metadata/common versions and corrupt the
+# provider heap when it frees a CaptureRequest. These copies win over the
+# source modules that install the same paths.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.camera.common-V1-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.camera.common-V1-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.camera.device-V1-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.camera.device-V1-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.camera.device-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.camera.device-V2-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.camera.metadata-V1-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.camera.metadata-V1-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.camera.provider-V1-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.camera.provider-V1-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.hardware.camera.provider-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.hardware.camera.provider-V2-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/vendor.qti.hardware.camera.offlinecamera-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.camera.offlinecamera-V2-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/vendor.qti.hardware.camera.aon-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.camera.aon-V2-ndk.so
+
 # SM8750 AudioPolicy uses the xuanyuan-specific top-level policy.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_ODM)/etc/audio_policy_configuration.xml \
@@ -412,11 +435,17 @@ PRODUCT_PACKAGES += \
     libcameraopt_jni_miuicamera_system_ext \
     libcamera_algoup_jni_xiaomi_miuicamera_system_ext
 
+# libcameraopt links the stock quickcamera AIDL client (stock OS4 system_ext).
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.xiaomi.hardware.quickcamera-V1-ndk.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.xiaomi.hardware.quickcamera-V1-ndk.so
+
 # Restore stock Qualcomm RFS symlink tree.
 $(call inherit-product, device/xiaomi/xuanyuan/rfs_symlinks/rfs_symlinks.mk)
 
+# Stock files no module installs (memtrack, feature declarations, overlays).
+$(call inherit-product, device/xiaomi/xuanyuan/stock_missing.mk)
+
 # Xiaomi compatibility HAL wrappers.
-# Fingerprint stays on the stock mfp-daemon path above.
 PRODUCT_PACKAGES += \
     vibratorfeature-wrapper-neoteric
 
