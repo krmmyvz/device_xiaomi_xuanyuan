@@ -270,16 +270,21 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/camera/satsnapshot-hdr-compatible.json:$(TARGET_COPY_OUT_ODM)/etc/camera/xiaomi/satsnapshot.json
 
-# Xiaomi 15 Ultra physical UDFPS stack.
-# Keep the known xuanyuan/Neoteric prebuilt wrapper: the SM8750 common layer
-# only supplies the AIDL runtime, while the Ultra keeps its QCOM ultrasonic HAL.
+# Xiaomi 15 Ultra physical UDFPS stack: the stock OS4 mfp-daemon, which the
+# stock vendor SELinux policy already confines (vendor_mfp-daemon). It loads the
+# stock fingerprint.{qcom,goodix}_us modules from /odm/lib64/hw; the AIDL
+# runtime libs it links come from source.
 PRODUCT_PACKAGES += \
-    android.hardware.biometrics.fingerprint-service.xiaomi-neoteric \
-    libudfpshandler \
-    fingerprint.qcom_us.default-neoteric \
-    init.mi_udfps-neoteric \
+    android.hardware.biometrics.common-V4-ndk.vendor \
+    android.hardware.biometrics.common.thread.vendor \
+    android.hardware.biometrics.common.util.vendor \
+    android.hardware.biometrics.fingerprint-V5-ndk.vendor \
     android.hardware.fingerprint.permission-neoteric \
     qti_fingerprint_interface.permission-neoteric
+
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/odm/bin/hw/mfp-daemon:$(TARGET_COPY_OUT_ODM)/bin/hw/mfp-daemon \
+    vendor/xiaomi/xuanyuan/proprietary/odm/etc/init/init.mfp-daemon.aidl.rc:$(TARGET_COPY_OUT_ODM)/etc/init/init.mfp-daemon.aidl.rc
 
 
 # Camera feature declarations from AOSP plus the stock xuanyuan extension list.
