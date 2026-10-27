@@ -444,3 +444,8 @@ PRODUCT_PACKAGES += android.frameworks.cameraservice.device-V2-ndk.vendor
 
 PRODUCT_PACKAGES += android.frameworks.cameraservice.service-V2-ndk.vendor
 PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.nfc.hce.xml:vendor/etc/permissions/android.hardware.nfc.hce.xml
+
+# SELinux: the vendor/odm policy is the stock OS4.0.0.6 one (202404). init compiles the
+# split policy at boot (enforcing); a build-time precompiled policy would mix it with
+# AOSP 16 neverallows. Re-enable once the vendor policy is built from source.
+PRODUCT_PRECOMPILED_SEPOLICY := false
