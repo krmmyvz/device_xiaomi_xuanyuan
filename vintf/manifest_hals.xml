@@ -1,0 +1,25 @@
+<!--
+    Stock vendor HALs whose VINTF fragments are not installed by this tree
+    (power, hostapd, Bluetooth audio provider in audiohalservice.qti, memtrack).
+-->
+<manifest version="8.0" type="device">
+    <hal format="aidl">
+        <name>android.hardware.power</name>
+        <version>5</version>
+        <fqname>IPower/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>android.hardware.wifi.hostapd</name>
+        <version>2</version>
+        <fqname>IHostapd/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>android.hardware.bluetooth.audio</name>
+        <version>4</version>
+        <fqname>IBluetoothAudioProviderFactory/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>android.hardware.memtrack</name>
+        <fqname>IMemtrack/default</fqname>
+    </hal>
+</manifest>

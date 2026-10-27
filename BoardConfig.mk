@@ -210,11 +210,20 @@ include vendor/xiaomi/xuanyuan/BoardConfigVendor.mk
 
 # VINTF
 DEVICE_MANIFEST_SKUS := sun kera tuna
-DEVICE_MANIFEST_SUN_FILES := $(DEVICE_PATH)/vintf/manifest_sun.xml
-DEVICE_MANIFEST_KERA_FILES := $(DEVICE_PATH)/vintf/manifest_kera.xml
-DEVICE_MANIFEST_TUNA_FILES := $(DEVICE_PATH)/vintf/manifest_tuna.xml
+# libvintf loads manifest_<sku>.xml instead of manifest.xml when the SKU file
+# exists, so every HAL declared outside the stock SKU manifests must be merged
+# into each of them; DEVICE_MANIFEST_FILE alone is ignored at runtime.
+XUANYUAN_SKU_MANIFEST_FRAGMENTS := \
+    $(DEVICE_PATH)/configs/wifi/android.hardware.wifi-service.xml \
+    hardware/interfaces/ir/aidl/default/android.hardware.ir-service.example.xml \
+    $(DEVICE_PATH)/vintf/manifest_hals.xml
+DEVICE_MANIFEST_SUN_FILES := $(DEVICE_PATH)/vintf/manifest_sun.xml $(XUANYUAN_SKU_MANIFEST_FRAGMENTS)
+DEVICE_MANIFEST_KERA_FILES := $(DEVICE_PATH)/vintf/manifest_kera.xml $(XUANYUAN_SKU_MANIFEST_FRAGMENTS)
+DEVICE_MANIFEST_TUNA_FILES := $(DEVICE_PATH)/vintf/manifest_tuna.xml $(XUANYUAN_SKU_MANIFEST_FRAGMENTS)
 
 ODM_MANIFEST_FILES := $(DEVICE_PATH)/vintf/manifest_odm.xml
+# Stock mfp-daemon (IFingerprint/default).
+ODM_MANIFEST_FILES += vendor/xiaomi/xuanyuan/proprietary/odm/etc/vintf/manifest/AHBF-V3-service.xml
 
 # Base manifest: provides target-level for the SKU-less VINTF check.
 DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/vintf/manifest.xml
