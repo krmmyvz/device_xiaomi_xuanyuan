@@ -246,3 +246,7 @@ vendor.media.vpp.aie.ltmsatoff=55
 vendor.media.vpp.debug.value.use=false
 vendor.wc_transport.force_special_byte=true
 vendor.zram.disable=1
+
+# MIUI Camera treats builds without a *_global mod_device as China builds and
+# blocks the camera behind the CTA consent dialog (MIUI Security Center).
+ro.product.mod_device=xuanyuan_global
