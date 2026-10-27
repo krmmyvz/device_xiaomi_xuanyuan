@@ -312,19 +312,22 @@ PRODUCT_COPY_FILES += \
 
 # Camera feature declarations from AOSP plus the stock xuanyuan extension list.
 PRODUCT_PACKAGES += \
-    libcamxexternalformatutils-vendor-xuanyuan \
-    libui-camera303-xuanyuan
+    libcamxexternalformatutils-vendor-xuanyuan
 
-# Verified stock303 camera graphics namespace, without replacing display's vendor copies.
+# The camera provider uses the vendor (stock OS4) graphics stack, except for
+# tinyxml2/gralloctypes, whose source-built vendor variants differ from the ones
+# camx was built against; stock OS4 copies go to /odm/lib64 instead. The old
+# stock303 copies broke gralloc buffer mapping. camx also mishandles tagged heap
+# pointers, so the provider (patched to DT_NEEDED callstack.so) loads a shim
+# that turns heap pointer tagging off for that process only.
 PRODUCT_PACKAGES += \
-    libcamera_heap_compat \
     android.hardware.graphics.common-V5-ndk.vendor \
     android.hardware.graphics.allocator-V2-ndk.vendor \
-    mapper.qti-camera303-xuanyuan \
-    libtinyxml2-camera303-xuanyuan \
-    libgralloctypes-camera303-xuanyuan \
-    libmapperutils-camera303-xuanyuan \
-    snapalloc-impl-camera303-xuanyuan
+    libcamera_heap_compat
+
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/odm/lib64/libtinyxml2.so:$(TARGET_COPY_OUT_ODM)/lib64/libtinyxml2.so \
+    vendor/xiaomi/xuanyuan/proprietary/odm/lib64/libgralloctypes.so:$(TARGET_COPY_OUT_ODM)/lib64/libgralloctypes.so
 
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.camera.concurrent.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.camera.concurrent.xml \
