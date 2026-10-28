@@ -438,6 +438,28 @@ PRODUCT_PACKAGES += \
     libcameraopt_jni_miuicamera_system_ext \
     libcamera_algoup_jni_xiaomi_miuicamera_system_ext
 
+# Stock libui/libgui: stock camx and other vendor blobs are built against them;
+# the source-built vendor variants corrupt the camera provider heap.
+# systemhelperaidl-V1: stock adds ISystemTUICallback, which mitrustedui links.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/libui.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libui.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/libgui.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libgui.so \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so
+
+# Stock QCC system HAL (system_ext): the location XTRA daemon registers with QCC
+# before downloading assistance data.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/bin/qccsyshal_aidl-service:$(TARGET_COPY_OUT_SYSTEM_EXT)/bin/qccsyshal_aidl-service \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/init/vendor.qti.qccsyshal_aidl-service.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/vendor.qti.qccsyshal_aidl-service.rc \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/permissions/com.qti.qcc.vendor_qcc.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/com.qti.qcc.vendor_qcc.xml \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/libqcc.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libqcc.so \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/libqcc_netstats.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libqcc_netstats.so \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/libqccdme.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libqccdme.so \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/libqccfileservice.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libqccfileservice.so \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.qti.qccsyshal_aidl-V1-ndk.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.qccsyshal_aidl-V1-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.qti.qccsyshal_aidl-halimpl.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.qccsyshal_aidl-halimpl.so \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.qti.qccvndhal_aidl-V2-ndk.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.qccvndhal_aidl-V2-ndk.so
+
 # libcameraopt links the stock quickcamera AIDL client (stock OS4 system_ext).
 PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.xiaomi.hardware.quickcamera-V1-ndk.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.xiaomi.hardware.quickcamera-V1-ndk.so

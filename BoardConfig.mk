@@ -221,6 +221,9 @@ DEVICE_MANIFEST_SUN_FILES := $(DEVICE_PATH)/vintf/manifest_sun.xml $(XUANYUAN_SK
 DEVICE_MANIFEST_KERA_FILES := $(DEVICE_PATH)/vintf/manifest_kera.xml $(XUANYUAN_SKU_MANIFEST_FRAGMENTS)
 DEVICE_MANIFEST_TUNA_FILES := $(DEVICE_PATH)/vintf/manifest_tuna.xml $(XUANYUAN_SKU_MANIFEST_FRAGMENTS)
 
+# Stock QCC system HAL (system_ext framework manifest).
+SYSTEM_EXT_MANIFEST_FILES += vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/vintf/manifest/vendor.qti.qccsyshal_aidl-service.xml
+
 ODM_MANIFEST_FILES := $(DEVICE_PATH)/vintf/manifest_odm.xml
 # Stock mfp-daemon (IFingerprint/default).
 ODM_MANIFEST_FILES += vendor/xiaomi/xuanyuan/proprietary/odm/etc/vintf/manifest/AHBF-V3-service.xml
