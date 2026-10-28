@@ -223,6 +223,8 @@ DEVICE_MANIFEST_TUNA_FILES := $(DEVICE_PATH)/vintf/manifest_tuna.xml $(XUANYUAN_
 
 # Stock QCC system HAL (system_ext framework manifest).
 SYSTEM_EXT_MANIFEST_FILES += vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/vintf/manifest/vendor.qti.qccsyshal_aidl-service.xml
+# The SDK 36 QCC app talks to the HIDL system HAL; stock (SDK 37) only ships the AIDL one.
+SYSTEM_EXT_MANIFEST_FILES += $(DEVICE_PATH)/vintf/qccsyshal_hidl.xml
 
 ODM_MANIFEST_FILES := $(DEVICE_PATH)/vintf/manifest_odm.xml
 # Stock mfp-daemon (IFingerprint/default).

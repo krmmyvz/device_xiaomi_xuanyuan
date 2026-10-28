@@ -446,10 +446,17 @@ PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/libgui.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libgui.so \
     vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so
 
+# The panel on this unit reports a display ID that none of the stock
+# display_id_*.xml files match (both stock port-147 configs are identical), so
+# DisplayDeviceConfig fell back to defaults with no HBM. Add the port fallback.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/etc/displayconfig/display_id_4630946916234099603.xml:$(TARGET_COPY_OUT_VENDOR)/etc/displayconfig/display_port_147.xml
+
 # Stock QCC system HAL (system_ext): the location XTRA daemon registers with QCC
 # before downloading assistance data.
 PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/bin/qccsyshal_aidl-service:$(TARGET_COPY_OUT_SYSTEM_EXT)/bin/qccsyshal_aidl-service \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/bin/qccsyshal@1.2-service:$(TARGET_COPY_OUT_SYSTEM_EXT)/bin/qccsyshal@1.2-service \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/init/vendor.qti.qccsyshal_aidl-service.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/vendor.qti.qccsyshal_aidl-service.rc \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/permissions/com.qti.qcc.vendor_qcc.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/com.qti.qcc.vendor_qcc.xml \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/libqcc.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libqcc.so \
