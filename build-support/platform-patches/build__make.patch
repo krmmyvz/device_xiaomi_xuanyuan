@@ -1,5 +1,5 @@
 diff --git a/core/Makefile b/core/Makefile
-index aecbdf5..d055e36 100644
+index aecbdf5..122bfdf 100644
 --- a/core/Makefile
 +++ b/core/Makefile
 @@ -1054,7 +1054,10 @@ endif
@@ -14,6 +14,15 @@ index aecbdf5..d055e36 100644
  $(INSTALLED_DTBOIMAGE_TARGET): $(BOARD_PREBUILT_DTBOIMAGE) $(AVBTOOL) $(BOARD_AVB_DTBO_KEY_PATH)
  	cp $(BOARD_PREBUILT_DTBOIMAGE) $@
  	chmod +w $@
+@@ -1255,7 +1258,7 @@ INTERNAL_PREBUILT_BOOTIMAGE :=
+ # handle that case and continue to pass the OS-version/patch-level values into the init_boot.img.
+ INTERNAL_MKBOOTIMG_VERSION_ARGS := \
+   --os_version $(PLATFORM_VERSION_LAST_STABLE) \
+-  --os_patch_level $(PLATFORM_SECURITY_PATCH)
++  --os_patch_level $(or $(BOOT_SECURITY_PATCH),$(PLATFORM_SECURITY_PATCH))
+ 
+ my_installed_prebuilt_gki_apex := $(strip $(foreach package,$(PRODUCT_PACKAGES),$(if $(ALL_MODULES.$(package).EXTRACTED_BOOT_IMAGE),$(package))))
+ ifdef my_installed_prebuilt_gki_apex
 diff --git a/core/config.mk b/core/config.mk
 index 8d308fe..798c3d7 100644
 --- a/core/config.mk
@@ -42,7 +51,7 @@ index 8d308fe..798c3d7 100644
  ifeq ($(PRODUCT_RETROFIT_DYNAMIC_PARTITIONS),true)
    ifneq ($(PRODUCT_USE_DYNAMIC_PARTITIONS),true)
 diff --git a/tools/releasetools/common.py b/tools/releasetools/common.py
-index 47ab9e7..f14b0c2 100644
+index 47ab9e7..621a2c9 100644
 --- a/tools/releasetools/common.py
 +++ b/tools/releasetools/common.py
 @@ -1105,8 +1105,11 @@ class PartitionBuildProps(object):
@@ -59,3 +68,45 @@ index 47ab9e7..f14b0c2 100644
        try:
          data = ReadFromInputFile(input_file, prop_file)
          break
+@@ -1378,10 +1381,18 @@ def PartitionMapFromTargetFiles(target_files_dir):
+       "odm_dlkm": ["ODM_DLKM", "VENDOR/odm_dlkm", "SYSTEM/vendor/odm_dlkm"],
+       "system_dlkm": ["SYSTEM_DLKM", "SYSTEM/system_dlkm"],
+   }
++  # Signing passes an open target files zip instead of an extracted directory.
++  if isinstance(target_files_dir, zipfile.ZipFile):
++    names = target_files_dir.namelist()
++    def exists(subdir):
++      return any(n.startswith(subdir + "/") for n in names)
++  else:
++    def exists(subdir):
++      return os.path.exists(os.path.join(target_files_dir, subdir))
+   partition_map = {}
+   for partition, subdirs in possible_subdirs.items():
+     for subdir in subdirs:
+-      if os.path.exists(os.path.join(target_files_dir, subdir)):
++      if exists(subdir):
+         partition_map[partition] = subdir
+         break
+   return partition_map
+diff --git a/tools/releasetools/sign_target_files_apks.py b/tools/releasetools/sign_target_files_apks.py
+index 73c4b50..def53e0 100755
+--- a/tools/releasetools/sign_target_files_apks.py
++++ b/tools/releasetools/sign_target_files_apks.py
+@@ -739,8 +739,17 @@ def ProcessTargetFiles(input_tf_zip: zipfile.ZipFile, output_tf_zip: zipfile.Zip
+ 
+   RegenerateKernelPartitions(input_tf_zip, output_tf_zip, misc_info)
+ 
++  # A prebuilt vendor_boot (BOARD_PREBUILT_VENDOR_BOOTIMAGE) has no ramdisk tree
++  # to rebuild from, so keep the image; its footer is already signed at build time.
++  keep_vendor_boot = not any(
++      n.startswith("VENDOR_BOOT/RAMDISK/") for n in input_tf_zip.namelist())
++
+   for info in input_tf_zip.infolist():
+     filename = info.filename
++    if filename == "IMAGES/vendor_boot.img" and keep_vendor_boot:
++      common.ZipWriteStr(output_tf_zip, copy.copy(info),
++                         input_tf_zip.read(filename))
++      continue
+     if filename.startswith("IMAGES/"):
+       continue
+ 
