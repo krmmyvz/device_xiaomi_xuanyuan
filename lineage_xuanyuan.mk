@@ -46,6 +46,8 @@ PRODUCT_PACKAGES := $(filter-out \
     libvisualizeraidl, \
     $(PRODUCT_PACKAGES))
 
+# Diagnostic settings for userdebug test builds only; user builds stay locked down.
+ifneq ($(TARGET_BUILD_VARIANT),user)
 # Diagnostic build (temporary; revert for daily builds): debuggable userdebug with
 # preloaded adb keys so logs can be read when the display never comes up.
 # Must be empty: add_json_bool treats any non-empty value (even "false") as true.
@@ -55,3 +57,4 @@ PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/debug/diaglog.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/diaglog.rc \
     vendor/xiaomi/xuanyuan/debug/diaglog.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/diaglog.sh
 PRODUCT_PRODUCT_PROPERTIES += persist.sys.usb.config=adb
+endif
