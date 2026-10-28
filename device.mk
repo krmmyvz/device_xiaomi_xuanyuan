@@ -452,6 +452,11 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/proprietary/vendor/etc/displayconfig/display_id_4630946916234099603.xml:$(TARGET_COPY_OUT_VENDOR)/etc/displayconfig/display_port_147.xml
 
+# Stock system_ext blobs (QCC protobuf, camera opt, WFD config) are built against
+# Android 17 libc++, which exports std::__hash_memory; provide it for Android 16.
+PRODUCT_PACKAGES += \
+    libhash_memory_shim
+
 # Stock QCC system HAL (system_ext): the location XTRA daemon registers with QCC
 # before downloading assistance data.
 PRODUCT_COPY_FILES += \
