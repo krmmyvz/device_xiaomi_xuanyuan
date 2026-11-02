@@ -59,3 +59,6 @@ PRODUCT_PRODUCT_PROPERTIES += persist.sys.usb.config=adb
 # Keep every log from the very first boot (setup wizard included) under /data/misc/logd
 # (logcatd, 2 MB x 256 rotation); diaglog above only keeps a few MB per boot.
 PRODUCT_PRODUCT_PROPERTIES += persist.logd.logpersistd=logcatd
+# persist.logd.logpersistd only has an effect when logcatd is installed; it is not
+# part of a user build by default.
+PRODUCT_PACKAGES += logcatd
