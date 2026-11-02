@@ -1,5 +1,5 @@
 runtime_resource_overlay {
-    name: "xuanyuan_a16_SystemUIRes",
+    name: "xuanyuan_SystemUIRes",
     manifest: "AndroidManifest.xml",
     resource_dirs: ["res"],
     sdk_version: "current",

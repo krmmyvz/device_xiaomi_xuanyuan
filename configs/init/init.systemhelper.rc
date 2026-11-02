@@ -1,0 +1,6 @@
+# The QTI system helper ships with <application android:enabled="false">, so its
+# systemhelperaidl services (ISystemTUICallback and friends) never register and
+# mitrustedui keeps asking servicemanager to lazy-start them. Enable it once boot
+# has completed; the package manager keeps the setting from then on.
+on property:sys.boot_completed=1
+    exec_background u:r:shell:s0 shell shell -- /system/bin/sh -c "cmd package enable com.qualcomm.qti.services.systemhelper"

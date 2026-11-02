@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Native 1440x3200 panel: 25400 um/in / 521.77 dpi. -->
+    <item name="pixel_pitch" format="float" type="dimen">48.68</item>
+    <!-- QS basligi (saat/tarih/pil) karo blogundan daha iceride olsun: 105px.
+         Canli olcum: baslik 106/105, karolar ve bildirimler 60/60 (stok). -->
+    <dimen name="rounded_corner_content_padding">105px</dimen>
+    <dimen name="status_bar_padding_top">38px</dimen>
+    <!-- AOSP varsayilani 620px; 3200px panelde guc dugmesinin cok ustunde kaliyor.
+         Ekran yuksekliginin ~%47'si = guc dugmesi merkezi. -->
+    <dimen name="physical_power_button_center_screen_location_y">1500px</dimen>
+</resources>

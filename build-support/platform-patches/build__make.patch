@@ -89,21 +89,28 @@ index 47ab9e7..621a2c9 100644
          break
    return partition_map
 diff --git a/tools/releasetools/sign_target_files_apks.py b/tools/releasetools/sign_target_files_apks.py
-index 73c4b50..def53e0 100755
+index 73c4b50..0486ca3 100755
 --- a/tools/releasetools/sign_target_files_apks.py
 +++ b/tools/releasetools/sign_target_files_apks.py
-@@ -739,8 +739,17 @@ def ProcessTargetFiles(input_tf_zip: zipfile.ZipFile, output_tf_zip: zipfile.Zip
+@@ -739,8 +739,24 @@ def ProcessTargetFiles(input_tf_zip: zipfile.ZipFile, output_tf_zip: zipfile.Zip
  
    RegenerateKernelPartitions(input_tf_zip, output_tf_zip, misc_info)
  
-+  # A prebuilt vendor_boot (BOARD_PREBUILT_VENDOR_BOOTIMAGE) has no ramdisk tree
-+  # to rebuild from, so keep the image; its footer is already signed at build time.
-+  keep_vendor_boot = not any(
-+      n.startswith("VENDOR_BOOT/RAMDISK/") for n in input_tf_zip.namelist())
++  # Prebuilt partition images (BOARD_PREBUILT_*IMAGE) have no tree to rebuild
++  # from, so keep them; their AVB footers are already added at build time.
++  names = input_tf_zip.namelist()
++  def has_tree(subdir):
++    return any(n.startswith(subdir) for n in names)
++  keep_images = set()
++  if not has_tree("VENDOR_BOOT/RAMDISK/"):
++    keep_images.add("IMAGES/vendor_boot.img")
++  for partition in ("vendor_dlkm", "odm_dlkm", "system_dlkm"):
++    if not has_tree(partition.upper() + "/"):
++      keep_images.add("IMAGES/{}.img".format(partition))
 +
    for info in input_tf_zip.infolist():
      filename = info.filename
-+    if filename == "IMAGES/vendor_boot.img" and keep_vendor_boot:
++    if filename in keep_images:
 +      common.ZipWriteStr(output_tf_zip, copy.copy(info),
 +                         input_tf_zip.read(filename))
 +      continue

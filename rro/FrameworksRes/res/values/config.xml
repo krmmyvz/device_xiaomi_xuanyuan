@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="config_disableWeaverOnUnsecuredUsers">true</bool>
+    <bool name="config_hotswapCapable">true</bool>
+    <bool name="config_automatic_brightness_available">true</bool>
+
+    <!-- Values derived from Xiaomi's stock Android 16 overlays. -->
+    <string translatable="false" name="config_mainBuiltInDisplayCutout">M 0,0 H -40.5 V 146 H 40.5 V 0 H 0 Z</string>
+
+    <!-- MIUI's config_dozeAfterScreenOff maps to AOSP's current resource. -->
+    <bool name="config_dozeAfterScreenOffByDefault">true</bool>
+    <bool name="config_dozeAlwaysOnDisplayAvailable">true</bool>
+    <bool name="config_dozeAlwaysOnEnabled">true</bool>
+
+    <!-- Stock uses integer 17; also provide the normalized AOSP float path. -->
+    <integer name="config_screenBrightnessDoze">1</integer>
+    <item name="config_screenBrightnessDozeFloat" format="float" type="dimen">0.0</item>
+
+    <!-- Double tap to wake: Xiaomi touch double-tap wakeup sensor. -->
+    <string translatable="false" name="config_dozeDoubleTapSensorType">xiaomi.sensor.dbtap</string>
+
+    <string translatable="false" name="config_dozeComponent">com.android.systemui/com.android.systemui.doze.DozeService</string>
+
+    <!-- Telephony / IMS capability for xuanyuan -->
+    <bool name="config_device_volte_available">true</bool>
+    <bool name="config_carrier_volte_available">true</bool>
+    <bool name="config_device_vt_available">true</bool>
+    <bool name="config_device_wfc_ims_available">true</bool>
+    <!-- Under-display fingerprint wake/doze support -->
+    <bool name="config_screen_off_udfps_enabled">true</bool>
+    <bool name="config_screen_off_udfps_default_on">true</bool>
+    <string name="config_dozeUdfpsLongPressSensorType" translatable="false">org.lineageos.sensor.udfps</string>
+
+    <!-- Uyanista panel doze parlakligindan hedefe 2.6 sn'de rampa yapiyor
+         (olculdu: 10766 -> 279). Goz bunu 'kisilma' olarak algiliyor;
+         rampa atlanip dogrudan hedef parlakliga geciliyor. -->
+    <bool name="config_skipScreenOnBrightnessRamp">true</bool>
+
+    <!-- Manuel parlaklik: panel DBV'si ~0.86'da doyuyor (olculdu: slider 220 ve 255 ayni DBV).
+         Ust siniri oraya cekiyoruz ki slider'in tamami kullanilsin. -->
+    <item name="config_screenBrightnessSettingMaximumFloat" format="float" type="dimen">0.86</item>
+
+    <!-- Otomatik parlaklik egrisi: AOSP/Pixel varsayilani bu panelde cok karanlik kaliyordu
+         (oda isiginda lux~46 -> parlaklik 10/255). Lux -> nit eslemesi panel haritasina gore. -->
+    <integer-array name="config_autoBrightnessLevels">
+        <item>10</item>
+        <item>40</item>
+        <item>100</item>
+        <item>400</item>
+        <item>1000</item>
+        <item>4000</item>
+        <item>10000</item>
+    </integer-array>
+    <array name="config_autoBrightnessDisplayValuesNits">
+        <item>2.0</item>
+        <item>8.0</item>
+        <item>30.0</item>
+        <item>70.0</item>
+        <item>150.0</item>
+        <item>300.0</item>
+        <item>600.0</item>
+        <item>782.0</item>
+    </array>
+
+    <!-- 146px varsayilan QS basligini ust kenara cok yakin birakiyordu (olculdu: 52px).
+         200px ile baslik 79px'e iniyor; canli testte onaylandi. -->
+    <dimen name="status_bar_height">200px</dimen>
+</resources>

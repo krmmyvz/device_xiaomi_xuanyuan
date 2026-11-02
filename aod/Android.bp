@@ -1,0 +1,14 @@
+cc_binary {
+    name: "xiaomi-aod-notifier",
+    vendor: true,
+    srcs: ["main.cpp"],
+    init_rc: ["xiaomi-aod-notifier.rc"],
+    shared_libs: [
+        "android.frameworks.sensorservice-V1-ndk",
+        "android.hardware.sensors-V3-ndk",
+        "libbase",
+        "libbinder_ndk",
+        "liblog",
+    ],
+    cflags: ["-Wall", "-Werror"],
+}

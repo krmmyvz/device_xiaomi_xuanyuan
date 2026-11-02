@@ -1,0 +1,11 @@
+<manifest version="1.0" type="framework">
+    <hal format="aidl">
+        <name>vendor.qti.hardware.systemhelperaidl</name>
+        <fqname>ISystemEvent/default</fqname>
+        <fqname>ISystemResource/default</fqname>
+    </hal>
+    <hal format="aidl">
+        <name>vendor.qti.hardware.systemhelperaidl</name>
+        <fqname>ISystemTUICallback/default</fqname>
+    </hal>
+</manifest>

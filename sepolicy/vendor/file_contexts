@@ -19,3 +19,7 @@
 
 # SPI transmitter used by the stock 303 consumer IR HAL.
 /dev/ir_spi    u:object_r:vendor_ir_spi_device:s0
+
+# SurfaceFlinger loads the stock gralloc types library through the vendor/odm HAL
+# namespace; the inherited policy labels it vendor_file, which it may not read.
+/(vendor|odm)/lib(64)?/libgralloctypes\.so    u:object_r:same_process_hal_file:s0

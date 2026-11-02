@@ -211,6 +211,8 @@ vendor.usb.use_ffs_mtp=1
 vendor.usb.use_gadget_hal=1
 
 # Wi-Fi
+# Debuggable builds would otherwise run cnss_diag and tcpdump into /data/vendor/wlan_logs.
+persist.vendor.performance.disable.wlan_logs=1
 wifi.aware.interface=wifi-aware0
 
 # Miscellaneous

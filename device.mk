@@ -28,13 +28,13 @@ PRODUCT_PACKAGES += \
 AB_OTA_POSTINSTALL_CONFIG += \
     RUN_POSTINSTALL_system=true \
     POSTINSTALL_PATH_system=system/bin/otapreopt_script \
-    FILESYSTEM_TYPE_system=ext4 \
+    FILESYSTEM_TYPE_system=erofs \
     POSTINSTALL_OPTIONAL_system=true
 
 AB_OTA_POSTINSTALL_CONFIG += \
     RUN_POSTINSTALL_vendor=true \
     POSTINSTALL_PATH_vendor=bin/checkpoint_gc \
-    FILESYSTEM_TYPE_vendor=ext4 \
+    FILESYSTEM_TYPE_vendor=erofs \
     POSTINSTALL_OPTIONAL_vendor=true
 
 PRODUCT_PACKAGES += \
@@ -227,6 +227,7 @@ PRODUCT_COPY_FILES += \
 # These source-tree permission XMLs are byte-identical to the stock versions.
 PRODUCT_PACKAGES += \
     qti_telephony_hidl_wrapper.xml \
+    qti-telephony-utils \
     qti_telephony_utils.xml
 
 # Legacy vendor Binder context manager required by stock vendor stack
@@ -283,6 +284,12 @@ PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/vendor.qti.hardware.camera.offlinecamera-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.camera.offlinecamera-V2-ndk.so \
     vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/vendor.qti.hardware.camera.aon-V2-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/vendor.qti.hardware.camera.aon-V2-ndk.so
 
+# Uyanista panel doze parlakligindan hedefe 3 sn'lik rampa yapiyordu (olculdu: 10766 -> 279);
+# goz bunu "kisilma" olarak algiliyor. Vendor XML'deki 3000 ms'lik rampayi 250 ms'e cekiyoruz.
+# DisplayDeviceConfig once product/etc/displayconfig'e bakar, sonra vendor'a.
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/displayconfig/display_port_147.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/displayconfig/display_port_147.xml
+
 # SM8750 AudioPolicy uses the xuanyuan-specific top-level policy.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_ODM)/etc/audio_policy_configuration.xml \
@@ -292,6 +299,16 @@ PRODUCT_COPY_FILES += \
 # JPEG UltraHDR and HEIF compatibility: retain gainmaps, omit orphan sharp-image branches.
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/camera/satsnapshot-hdr-compatible.json:$(TARGET_COPY_OUT_ODM)/etc/camera/xiaomi/satsnapshot.json
+
+# mfp-daemon links the AOSP biometrics AIDL libraries at the exact layout it was built with
+# (the stock SensorProps is bigger than the source-built one: 314 vs 229 exported symbols).
+# Frees of its SensorProps reply hit garbage pointers in the source-built copies, which bionic
+# reports as "Pointer tag ... was truncated". Only the stock fingerprint stack loads these.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/odm/lib64/android.hardware.biometrics.fingerprint-V5-ndk.so:$(TARGET_COPY_OUT_ODM)/lib64/android.hardware.biometrics.fingerprint-V5-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/odm/lib64/android.hardware.biometrics.common-V4-ndk.so:$(TARGET_COPY_OUT_ODM)/lib64/android.hardware.biometrics.common-V4-ndk.so \
+    vendor/xiaomi/xuanyuan/proprietary/odm/lib64/android.hardware.biometrics.common.thread.so:$(TARGET_COPY_OUT_ODM)/lib64/android.hardware.biometrics.common.thread.so \
+    vendor/xiaomi/xuanyuan/proprietary/odm/lib64/android.hardware.biometrics.common.util.so:$(TARGET_COPY_OUT_ODM)/lib64/android.hardware.biometrics.common.util.so
 
 # Xiaomi 15 Ultra physical UDFPS stack: the stock OS4 mfp-daemon, which the
 # stock vendor SELinux policy already confines (vendor_mfp-daemon). It loads the
@@ -358,8 +375,8 @@ PRODUCT_PACKAGES += \
     xuanyuan_wlan_wcn7750_cfg \
     xuanyuan_wlan_wcn7750_mac \
     xuanyuan_wlanmdsp_otaupdate \
-    xuanyuan_a16_FrameworksRes \
-    xuanyuan_a16_SystemUIRes
+    xuanyuan_FrameworksRes \
+    xuanyuan_SystemUIRes
 
 # The 303 IR service is a prebuilt, so it does not inherit the source
 # module's init_rc/vintf_fragments. Install the RC and feature here; the AIDL
@@ -457,6 +474,25 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     libhash_memory_shim
 
+# QTI system helper (system_ext): registers the systemhelperaidl services. Without
+# it the Xiaomi trusted UI HAL polls servicemanager for ISystemTUICallback forever.
+PRODUCT_PACKAGES += \
+    com.qualcomm.qti.services.systemhelper \
+    systemhelper_jni_symlink
+
+PRODUCT_COPY_FILES += \
+    device/xiaomi/xuanyuan/configs/permissions/privapp-permissions-systemhelper.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-systemhelper.xml \
+    device/xiaomi/xuanyuan/configs/init/init.systemhelper.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.systemhelper.rc \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/libsystemhelper_jni.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libsystemhelper_jni.so \
+    vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.qti.hardware.systemhelper@1.0.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.hardware.systemhelper@1.0.so \
+    vendor/xiaomi/xuanyuan/proprietary/system/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so
+
+# The AIDL source library with the same name would add a second symbols entry for
+# vendor/lib64, so the stock copy is installed as a plain file; its cc module
+# (xiaomi.prebuilt.android.media.audio.common.types-V6-ndk) only serves as a link target.
+PRODUCT_COPY_FILES += \
+    vendor/xiaomi/xuanyuan/proprietary/vendor/lib64/android.media.audio.common.types-V6-ndk.so:$(TARGET_COPY_OUT_VENDOR)/lib64/android.media.audio.common.types-V6-ndk.so
+
 # Stock QCC system HAL (system_ext): the location XTRA daemon registers with QCC
 # before downloading assistance data.
 PRODUCT_COPY_FILES += \
@@ -520,3 +556,7 @@ PRODUCT_COPY_FILES += frameworks/native/data/etc/android.hardware.nfc.hce.xml:ve
 # split policy at boot (enforcing); a build-time precompiled policy would mix it with
 # AOSP 16 neverallows. Re-enable once the vendor policy is built from source.
 PRODUCT_PRECOMPILED_SEPOLICY := false
+
+# AOD: put the panel into its hardware doze mode (doze_brightness) while dozing
+PRODUCT_PACKAGES += \
+    xiaomi-aod-notifier

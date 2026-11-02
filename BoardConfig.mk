@@ -175,10 +175,9 @@ VENDOR_SECURITY_PATCH := 2026-09-01
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
-# Verification stays on for user builds; userdebug keeps it off for quick partition swaps.
-ifneq ($(TARGET_BUILD_VARIANT),user)
+# The bootloader stays unlocked and the vbmeta is not chained to a key the bootloader trusts, so
+# the vbmeta ships with verification disabled (flags 3) in every variant, OTA payload included.
 BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
-endif
 # Release builds pass their own key (XUANYUAN_AVB_KEY=/path/to/avb.pem).
 XUANYUAN_AVB_KEY ?= external/avb/test/data/testkey_rsa4096.pem
 BOARD_AVB_KEY_PATH := $(XUANYUAN_AVB_KEY)
@@ -232,6 +231,7 @@ DEVICE_MANIFEST_TUNA_FILES := $(DEVICE_PATH)/vintf/manifest_tuna.xml $(XUANYUAN_
 SYSTEM_EXT_MANIFEST_FILES += vendor/xiaomi/xuanyuan/proprietary/system_ext/etc/vintf/manifest/vendor.qti.qccsyshal_aidl-service.xml
 # The SDK 36 QCC app talks to the HIDL system HAL; stock (SDK 37) only ships the AIDL one.
 SYSTEM_EXT_MANIFEST_FILES += $(DEVICE_PATH)/vintf/qccsyshal_hidl.xml
+SYSTEM_EXT_MANIFEST_FILES += $(DEVICE_PATH)/vintf/systemhelperaidl.xml
 
 ODM_MANIFEST_FILES := $(DEVICE_PATH)/vintf/manifest_odm.xml
 # Stock mfp-daemon (IFingerprint/default).
