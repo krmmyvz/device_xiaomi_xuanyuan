@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <!-- Android System Intelligence reaches the network and downloads its models (Live Translate
+         language packs, every MDD file group) through the AstreaGrpcService of the open-source
+         Private Compute Services package. Android 17 only lets a PCC app bind to a PCC service
+         when sysconfig allows the association from both sides; the GMS sysconfig lists only Now
+         Playing for com.google.android.as.oss, so every other caller was refused. -->
+    <allow-association target="com.google.android.as.oss" allowed="com.google.android.as" />
+</config>

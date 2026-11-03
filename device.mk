@@ -487,6 +487,10 @@ PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.qti.hardware.systemhelper@1.0.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.hardware.systemhelper@1.0.so \
     vendor/xiaomi/xuanyuan/proprietary/system/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.hardware.systemhelperaidl-V1-ndk.so
 
+# Lets Android System Intelligence bind to Private Compute Services, see the comment in the file.
+PRODUCT_COPY_FILES += \
+    device/xiaomi/xuanyuan/configs/sysconfig/pcc-allow-association.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/sysconfig/pcc-allow-association.xml
+
 # The AIDL source library with the same name would add a second symbols entry for
 # vendor/lib64, so the stock copy is installed as a plain file; its cc module
 # (xiaomi.prebuilt.android.media.audio.common.types-V6-ndk) only serves as a link target.
