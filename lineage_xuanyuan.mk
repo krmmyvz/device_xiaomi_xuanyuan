@@ -55,7 +55,6 @@ PRODUCT_ADB_KEYS := vendor/xiaomi/xuanyuan/debug/adb_keys
 PRODUCT_COPY_FILES += \
     vendor/xiaomi/xuanyuan/debug/diaglog.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/diaglog.rc \
     vendor/xiaomi/xuanyuan/debug/diaglog.sh:$(TARGET_COPY_OUT_SYSTEM)/bin/diaglog.sh
-PRODUCT_PRODUCT_PROPERTIES += persist.sys.usb.config=adb
 # Keep every log from the very first boot (setup wizard included) under /data/misc/logd
 # (logcatd, 2 MB x 256 rotation); diaglog above only keeps a few MB per boot.
 PRODUCT_PRODUCT_PROPERTIES += persist.logd.logpersistd=logcatd
