@@ -2,5 +2,7 @@
 <resources>
     <!-- xuanyuan panel supports hardware doze states for AOD. -->
     <bool name="doze_display_state_supported">true</bool>
-    <bool name="doze_suspend_display_state_supported">false</bool>
+    <!-- DOZE_SUSPEND lets HWC stop composing and the LTPO panel self-refresh at its idle rate;
+         with plain DOZE SurfaceFlinger kept the panel at 120 Hz for the whole AOD session. -->
+    <bool name="doze_suspend_display_state_supported">true</bool>
 </resources>

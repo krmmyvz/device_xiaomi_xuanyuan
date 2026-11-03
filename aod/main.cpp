@@ -1,10 +1,9 @@
 /*
  * Switches the panel into its hardware AOD mode while the screen dozes.
  *
- * The mi_disp driver only enters the low-power AOD mode (and drops to the DDIC refresh rate) when
- * doze_brightness is written; stock does this from MIUI. The sensor hub reports xiaomi.sensor.aod
- * when the display dozes and when the ambient light changes, so we map its value to
- * doze_brightness: 1 = high (HBM), 2 = low (LBM). Leaving doze resets it in the driver.
+ * The mi_disp driver writes doze_brightness = 1 (high, HBM) itself when the panel enters AOD.
+ * Stock switches it to 2 (low, LBM) in the dark from MIUI, but the xiaomi.sensor.aod events are
+ * not a reliable doze signal here, so this service no longer touches that node.
  *
  * It also turns on the touch IC double tap gesture (touchfeature mode 14), which stock enables
  * from MIUI settings; without it xiaomi.sensor.dbtap never fires for double tap to wake.
@@ -20,10 +19,7 @@
 #include <android/binder_manager.h>
 #include <android/binder_process.h>
 
-#include <atomic>
-#include <chrono>
 #include <string>
-#include <thread>
 
 using aidl::android::frameworks::sensorservice::BnEventQueueCallback;
 using aidl::android::frameworks::sensorservice::IEventQueue;
@@ -34,9 +30,6 @@ using aidl::android::hardware::sensors::SensorInfo;
 namespace {
 
 constexpr char kAodSensorType[] = "xiaomi.sensor.aod";
-constexpr char kDozeBrightnessPath[] = "/sys/class/mi_display/disp-DSI-0/doze_brightness";
-constexpr char kDozeBrightnessHigh[] = "1";
-constexpr char kDozeBrightnessLow[] = "2";
 
 constexpr char kTouchFeatureInstance[] = "vendor.xiaomi.hw.touchfeature.ITouchFeature/default";
 constexpr char kTouchFeatureDescriptor[] = "vendor.xiaomi.hw.touchfeature.ITouchFeature";
@@ -83,61 +76,14 @@ float eventValue(const Event& event) {
     }
 }
 
-// Doze'a girisde cekirdek dogrudan HBM'e aliyor ve sensor olayi gelmese bile orada kaliyor.
-// Bu yuzden LBM'i periyodik olarak zorluyoruz; parlak ortam olayi (3) son 120 sn icindeyse
-// HBM'e dokunmuyoruz.
-std::atomic<int64_t> gLastBrightEventMs{0};
-// Yalnizca doze penceresinde yaziyoruz; uyanikken dugume dokunmak
-// kilit acilisinda paneli kisiyordu.
-std::atomic<bool> gDozing{false};
-
-void writeDozeBrightness(const char* mode) {
-    if (!android::base::WriteStringToFile(mode, kDozeBrightnessPath)) {
-        PLOG(ERROR) << "failed to write " << kDozeBrightnessPath;
-    }
-}
-
-// Kernel doze'a girerken kendi HIGH yazimini yapabiliyor; LOW'u kisa bir pencere icinde
-// birkac kez tekrarliyoruz. SINIRSIZ DONGU YOK: sensorun uyanis olayi (5) gelmediginde
-// gDozing true kaliyor ve dongu uyanikken LOW yazip paneli ANINDA kisiyordu.
-void reassertLowBrightness() {
-    for (int i = 0; i < 3; i++) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(i == 0 ? 300 : 900));
-        if (!gDozing.load()) return;
-        std::string cur;
-        if (android::base::ReadFileToString(kDozeBrightnessPath, &cur)) {
-            while (!cur.empty() && (cur.back() == '\n' || cur.back() == ' ')) cur.pop_back();
-            if (cur == kDozeBrightnessLow) continue;  // zaten LBM
-        }
-        writeDozeBrightness(kDozeBrightnessLow);
-    }
-}
-
+// doze_brightness'a artik yazmiyoruz. Sensor hub'in doze olayi (4) ekran acikken de geliyor ve
+// dugum uyanista sifirlanmiyor; acik ekranda LBM (2) yazmak paneli aniden kisiyordu. Guvenilir bir
+// doze sinyali olmadan AOD parlakligi cekirdegin varsayilaninda (HBM) kaliyor.
 class AodCallback : public BnEventQueueCallback {
   public:
     ndk::ScopedAStatus onEvent(const Event& event) override {
-        const int value = static_cast<int>(eventValue(event));
-        // 4 = doze'a giris, 5 = uyanis.
-        if (value == 4) {
-            gDozing.store(true);
-        } else if (value == 5) {
-            gDozing.store(false);
-        }
-        // 3 is reported in bright surroundings; everything else (dark/normal) gets the low mode.
-        const char* mode = value == 3 ? kDozeBrightnessHigh : kDozeBrightnessLow;
-        if (value == 3) {
-            gLastBrightEventMs.store(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                             std::chrono::steady_clock::now().time_since_epoch())
-                                             .count());
-        }
-        LOG(INFO) << "aod event " << value << " (dozing=" << gDozing.load()
-                  << ") -> " << (gDozing.load() ? mode : "yazma yok");
+        LOG(INFO) << "aod event " << static_cast<int>(eventValue(event));
         enableDoubleTapGesture();
-        // Uyanikken dugume yazmak paneli kisiyordu: sadece doze penceresinde yaz.
-        if (gDozing.load()) {
-            writeDozeBrightness(mode);
-            if (value != 3) std::thread(reassertLowBrightness).detach();
-        }
         return ndk::ScopedAStatus::ok();
     }
 };
