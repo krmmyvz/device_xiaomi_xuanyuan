@@ -20,6 +20,12 @@ $(call inherit-product, $(SRC_TARGET_DIR)/product/updatable_apex.mk)
 # A/B
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota.mk)
 
+# Virtual A/B compression: after an OTA the first stage init maps the snapshot with snapuserd,
+# which has to be in the init_boot ramdisk (the stock init_boot carries both of these).
+PRODUCT_PACKAGES += \
+    snapuserd_ramdisk \
+    toolbox_ramdisk
+
 PRODUCT_PACKAGES += \
     update_engine \
     update_engine_sideload \
