@@ -51,9 +51,10 @@
         <item>4000</item>
         <item>10000</item>
     </integer-array>
+    <!-- Karanlikta (0-10 lux) 2/8 nit panelin 3.6 nit tabanina iniyordu. -->
     <array name="config_autoBrightnessDisplayValuesNits">
-        <item>2.0</item>
-        <item>8.0</item>
+        <item>6.0</item>
+        <item>10.0</item>
         <item>30.0</item>
         <item>70.0</item>
         <item>150.0</item>
