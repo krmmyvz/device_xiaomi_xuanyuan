@@ -677,6 +677,13 @@
         </interface>
     </hal>
     <hal format="aidl" optional="true">
+        <name>vendor.xiaomi.hardware.postprocservice</name>
+        <interface>
+            <name>IPostProcService</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+    <hal format="aidl" optional="true">
         <name>vendor.xiaomi.hardware.aon</name>
         <interface>
             <name>IAlwaysOn</name>
