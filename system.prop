@@ -191,3 +191,6 @@ vendor.mm.enable.qcom_parser=16777215
 # Xiaomi 15 Ultra ultrasonic UDFPS backend
 persist.vendor.sys.fp.vendor=qcom_us
 persist.vendor.sys.fp.bigdata.type=qcom_us
+
+# Updater: update feed, laid out as <device>/<rom>/<device>.json on the server; {device} is ro.evolution.device
+evolution.updater.uri=https://ota.kerem.cloud/{device}/evolutionx/{device}.json
