@@ -497,6 +497,11 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/xiaomi/xuanyuan/configs/sysconfig/pcc-allow-association.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/sysconfig/pcc-allow-association.xml
 
+# Audio HAL vendor extension: forwards call_state/vsid and other QTI
+# parameters from the framework to the AIDL audio HAL
+PRODUCT_PACKAGES += \
+    qtiaudiohalvendorextn
+
 # The AIDL source library with the same name would add a second symbols entry for
 # vendor/lib64, so the stock copy is installed as a plain file; its cc module
 # (xiaomi.prebuilt.android.media.audio.common.types-V6-ndk) only serves as a link target.

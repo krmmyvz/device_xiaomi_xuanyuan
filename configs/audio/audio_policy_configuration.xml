@@ -82,7 +82,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         “defaultOutputDevice”: device to be used by default when no policy rule applies
     -->
     <modules>
-        <module name="primary" halVersion="2.0">
+        <module name="primary" halVersion="3.0">
             <attachedDevices>
                 <item>Speaker</item>
                 <item>Speaker Safe</item>
@@ -95,11 +95,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             <defaultOutputDevice>Speaker</defaultOutputDevice>
             <mixPorts>
                 <mixPort name="primary output" role="source" flags="AUDIO_OUTPUT_FLAG_PRIMARY AUDIO_OUTPUT_FLAG_FAST">
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                    <profile name="" format="AUDIO_FORMAT_PCM_24_BIT_PACKED"
                              samplingRates="48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
                 </mixPort>
                 <mixPort name="raw" role="source" flags="AUDIO_OUTPUT_FLAG_RAW AUDIO_OUTPUT_FLAG_FAST">
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                    <profile name="" format="AUDIO_FORMAT_PCM_24_BIT_PACKED"
                              samplingRates="48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
                 </mixPort>
                 <mixPort name="hifi_playback" role="source" />
@@ -129,7 +129,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                              samplingRates="8000 16000 48000" channelMasks="AUDIO_CHANNEL_OUT_MONO AUDIO_CHANNEL_OUT_STEREO"/>
                 </mixPort>
                 <mixPort name="mmap_no_irq_out" role="source" flags="AUDIO_OUTPUT_FLAG_DIRECT AUDIO_OUTPUT_FLAG_MMAP_NOIRQ">
-                    <profile name="" format="AUDIO_FORMAT_PCM_16_BIT"
+                    <profile name="" format="AUDIO_FORMAT_PCM_24_BIT_PACKED"
                              samplingRates="48000" channelMasks="AUDIO_CHANNEL_OUT_STEREO"/>
                 </mixPort>
                 <mixPort name="voip_rx" role="source"
@@ -204,25 +204,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             </devicePorts>
             <routes>
                 <route type="mix" sink="Earpiece"
-                       sources="primary output,raw,deep_buffer,mmap_no_irq_out,voip_rx"/>
+                       sources="primary output,raw,deep_buffer,mmap_no_irq_out,voip_rx,Telephony Rx"/>
                 <route type="mix" sink="Speaker"
-                       sources="primary output,raw,deep_buffer,compressed_offload,mmap_no_irq_out,voip_rx"/>
+                       sources="primary output,raw,deep_buffer,compressed_offload,mmap_no_irq_out,voip_rx,Telephony Rx"/>
                 <route type="mix" sink="Speaker Safe"
                        sources="primary output,raw,deep_buffer,compressed_offload,mmap_no_irq_out,voip_rx"/>
                 <route type="mix" sink="BT SCO"
-                       sources="primary output,raw,deep_buffer,voip_rx"/>
+                       sources="primary output,raw,deep_buffer,voip_rx,Telephony Rx"/>
                 <route type="mix" sink="BT SCO Headset"
-                       sources="primary output,raw,deep_buffer,voip_rx"/>
+                       sources="primary output,raw,deep_buffer,voip_rx,Telephony Rx"/>
                 <route type="mix" sink="BT SCO Car Kit"
-                       sources="primary output,raw,deep_buffer,voip_rx"/>
+                       sources="primary output,raw,deep_buffer,voip_rx,Telephony Rx"/>
                 <route type="mix" sink="USB Device Out"
-                       sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx"/>
+                       sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx,Telephony Rx"/>
                 <route type="mix" sink="USB Headset Out"
-                       sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx"/>
+                       sources="primary output,raw,deep_buffer,compressed_offload,hifi_playback,mmap_no_irq_out,voip_rx,Telephony Rx"/>
                 <route type="mix" sink="Telephony Tx"
-                       sources="voice_tx,incall_music_uplink"/>
+                       sources="voice_tx,incall_music_uplink,Built-In Mic,Built-In Back Mic,BT SCO Headset Mic,USB Device In,USB Headset In"/>
                 <route type="mix" sink="primary input"
-                       sources="Built-In Mic,Built-In Back Mic,BT SCO Headset Mic,USB Device In,USB Headset In"/>
+                       sources="Built-In Mic,Built-In Back Mic,BT SCO Headset Mic,USB Device In,USB Headset In,Telephony Rx"/>
                 <route type="mix" sink="fast input"
                        sources="Built-In Mic,Built-In Back Mic,BT SCO Headset Mic,USB Device In,USB Headset In"/>
                 <route type="mix" sink="voice_rx"
