@@ -382,6 +382,7 @@ PRODUCT_PACKAGES += \
     xuanyuan_wlan_wcn7750_mac \
     xuanyuan_wlanmdsp_otaupdate \
     xuanyuan_FrameworksRes \
+    xuanyuan_TelephonyRes \
     xuanyuan_SystemUIRes
 
 # The 303 IR service is a prebuilt, so it does not inherit the source

@@ -3,6 +3,13 @@
 # audio HAL never sees call_state/vsid and in-call audio stays silent.
 ro.audio.ihaladaptervendorextension_enabled=true
 
+# IMS
+# Most carrier configs leave VoLTE/VT/VoWiFi unavailable, which keeps
+# ImsManager from ever asking org.codeaurora.ims to register.
+persist.dbg.volte_avail_ovr=1
+persist.dbg.vt_avail_ovr=1
+persist.dbg.wfc_avail_ovr=1
+
 # Bluetooth
 bluetooth.device.class_of_device=90,2,12
 bluetooth.hfp.codec_aptx_voice.enabled=true

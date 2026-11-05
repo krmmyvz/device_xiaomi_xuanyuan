@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The QTI ImsService that provides MMTEL (VoLTE/VoWiFi/VT). Without it the
+         ImsResolver binds nothing and calls fall back to CS. -->
+    <string name="config_ims_mmtel_package" translatable="false">org.codeaurora.ims</string>
+</resources>

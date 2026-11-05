@@ -26,6 +26,11 @@
     <bool name="config_carrier_volte_available">true</bool>
     <bool name="config_device_vt_available">true</bool>
     <bool name="config_device_wfc_ims_available">true</bool>
+
+    <!-- QTI IWLAN: data, network and qualified networks services for VoWiFi -->
+    <string name="config_wlan_data_service_package" translatable="false">vendor.qti.iwlan</string>
+    <string name="config_wlan_network_service_package" translatable="false">vendor.qti.iwlan</string>
+    <string name="config_qualified_networks_service_package" translatable="false">vendor.qti.iwlan</string>
     <!-- Under-display fingerprint wake/doze support -->
     <bool name="config_screen_off_udfps_enabled">true</bool>
     <bool name="config_screen_off_udfps_default_on">true</bool>
