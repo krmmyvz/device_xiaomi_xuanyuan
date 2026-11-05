@@ -30,7 +30,6 @@ ROOT = pathlib.Path("/mnt/src")
 REMOVE = {
     "EidService",
     "OpenEUICC",
-    "libimsmedia_jni-xuanyuan",
     "uimremoteclient",
     "uimremoteclientlibrary",
     "uimremoteserver",

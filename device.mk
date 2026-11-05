@@ -488,6 +488,8 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_COPY_FILES += \
     device/xiaomi/xuanyuan/configs/permissions/privapp-permissions-systemhelper.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-systemhelper.xml \
+    device/xiaomi/xuanyuan/configs/permissions/privapp-permissions-qtitelephony.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-qtitelephony.xml \
+    device/xiaomi/xuanyuan/configs/sysconfig/qtitelephony.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/sysconfig/qtitelephony.xml \
     device/xiaomi/xuanyuan/configs/init/init.systemhelper.rc:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/init/init.systemhelper.rc \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/libsystemhelper_jni.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/libsystemhelper_jni.so \
     vendor/xiaomi/xuanyuan/proprietary/system_ext/lib64/vendor.qti.hardware.systemhelper@1.0.so:$(TARGET_COPY_OUT_SYSTEM_EXT)/lib64/vendor.qti.hardware.systemhelper@1.0.so \
